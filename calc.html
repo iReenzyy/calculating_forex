@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Risk Terminal Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --card-bg: rgba(25, 25, 25, 0.6);
+            --input-bg: rgba(40, 40, 40, 0.4);
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            
+            --accent-cyan: #00f2ea;
+            --accent-purple: #7b2cbf;
+            --danger: #ff3b30;
+            --success: #34c759;
+            --gold: #ffd700;
+            --btc: #f7931a;
+
+            --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+            --glow: 0 0 20px rgba(0, 242, 234, 0.15);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            background-image: radial-gradient(circle at top right, rgba(0, 242, 234, 0.05), transparent 40%);
+        }
+
+        /* --- Header --- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .brand {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 800;
+            font-size: 1.2rem;
+            letter-spacing: -1px;
+            background: linear-gradient(90deg, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .tick-info {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--input-bg);
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        /* --- Asset Chips --- */
+        .asset-scroll {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+            scrollbar-width: none;
+        }
+        .asset-scroll::-webkit-scrollbar { display: none; }
+
+        .chip {
+            background: var(--card-bg);
+            border: var(--glass-border);
+            color: var(--text-muted);
+            padding: 10px 18px;
+            border-radius: 14px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            backdrop-filter: blur(10px);
+        }
+        .chip.active {
+            background: var(--accent-cyan);
+            color: #000;
+            border-color: var(--accent-cyan);
+            box-shadow: var(--glow);
+            transform: translateY(-2px);
+        }
+        .chip[data-type="gold"].active { background: var(--gold); box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); }
+        .chip[data-type="crypto"].active { background: var(--btc); color: #fff; box-shadow: 0 0 20px rgba(247, 147, 26, 0.2); }
+
+        /* --- Input Grid --- */
+        .grid-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .input-box {
+            flex: 1;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            background: var(--input-bg);
+            border: var(--glass-border);
+            color: white;
+            padding: 14px 12px;
+            border-radius: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            box-sizing: border-box;
+            transition: 0.2s;
+            outline: none;
+        }
+        input:focus {
+            border-color: var(--accent-cyan);
+            background: rgba(40, 40, 40, 0.8);
+        }
+
+        /* Small Paste Icon inside Input */
+        .paste-icon {
+            position: absolute;
+            right: 12px;
+            top: 38px; /* Adjusted for label */
+            opacity: 0.3;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: 0.2s;
+        }
+        .paste-icon:hover { opacity: 1; color: var(--accent-cyan); }
+
+        /* --- Risk Switch --- */
+        .risk-switch {
+            display: flex;
+            background: var(--input-bg);
+            border-radius: 8px;
+            padding: 2px;
+            margin-bottom: 5px;
+        }
+        .switch-opt {
+            flex: 1;
+            text-align: center;
+            font-size: 0.75rem;
+            padding: 4px;
+            border-radius: 6px;
+            color: var(--text-muted);
+            transition: 0.2s;
+        }
+        .switch-opt.active {
+            background: #444;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* --- Slider --- */
+        .slider-section {
+            background: var(--card-bg);
+            border: var(--glass-border);
+            padding: 20px;
+            border-radius: 16px;
+            margin: 25px 0;
+            backdrop-filter: blur(10px);
+        }
+        
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+            margin-top: 10px;
+            border: none;
+            padding: 0;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, var(--accent-cyan) var(--ratio, 60%), #333 var(--ratio, 60%));
+            border-radius: 3px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 22px;
+            width: 22px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 0 15px rgba(255,255,255,0.5);
+            margin-top: -8px;
+            cursor: pointer;
+        }
+
+        .split-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        /* --- Results Area --- */
+        .results-container {
+            display: grid;
+            gap: 15px;
+        }
+
+        .res-card {
+            background: var(--card-bg);
+            border: var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.1s;
+        }
+        .res-card:active { transform: scale(0.98); }
+
+        /* Decoration glows */
+        .res-card.market { border-left: 3px solid var(--accent-cyan); }
+        .res-card.limit { border-left: 3px solid var(--success); }
+
+        .res-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .lot-size {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            line-height: 1.1;
+        }
+        .res-card.limit .lot-size { color: var(--success); }
+
+        .res-footer {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        
+        .copy-hint {
+            font-size: 0.7rem;
+            background: rgba(255,255,255,0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .res-card:active .copy-hint { opacity: 1; }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="brand">RISK//TERMINAL</div>
+        <div class="tick-info" id="tickDebug">Tick: $1.00</div>
+    </div>
+
+    <div class="asset-scroll">
+        <div class="chip active" onclick="setAsset(this, 'EURUSD')">EURUSD</div>
+        <div class="chip" onclick="setAsset(this, 'GBPUSD')">GBPUSD</div>
+        <div class="chip" onclick="setAsset(this, 'USDJPY')">USDJPY</div>
+        <div class="chip" data-type="gold" onclick="setAsset(this, 'XAUUSD')">GOLD</div>
+        <div class="chip" data-type="crypto" onclick="setAsset(this, 'BTCUSD')">BTC</div>
+    </div>
+
+    <div class="grid-row">
+        <div class="input-box">
+            <div class="risk-switch">
+                <div class="switch-opt active" id="modeUSD" onclick="toggleRisk('usd')">$ USD</div>
+                <div class="switch-opt" id="modePct" onclick="toggleRisk('pct')">% DEP</div>
+            </div>
+            <input type="number" id="riskInput" value="200" inputmode="decimal">
+        </div>
+        
+        <div class="input-box" id="balanceBox" style="display:none">
+            <label>Balance</label>
+            <input type="number" id="balanceInput" value="10000" inputmode="decimal">
+        </div>
+
+        <div class="input-box">
+            <label>Comm ($)</label>
+            <input type="number" id="commInput" value="7" inputmode="decimal">
+        </div>
+    </div>
+
+    <div class="grid-row">
+        <div class="input-box">
+            <label>Entry Price</label>
+            <input type="number" id="entryPrice" placeholder="0.00000" step="any" inputmode="decimal">
+            <span class="paste-icon" onclick="paste('entryPrice')">📋</span>
+        </div>
+        <div class="input-box">
+            <label>Stop Loss</label>
+            <input type="number" id="stopPrice" placeholder="0.00000" step="any" inputmode="decimal">
+            <span class="paste-icon" onclick="paste('stopPrice')">📋</span>
+        </div>
+    </div>
+
+    <div class="slider-section">
+        <div class="split-labels">
+            <span style="color:var(--accent-cyan)">MARKET <span id="mktPct">60</span>%</span>
+            <span style="color:var(--text-muted)">//</span>
+            <span style="color:var(--success)">LIMIT <span id="lmtPct">40</span>%</span>
+        </div>
+        <input type="range" id="splitSlider" min="0" max="100" value="60" oninput="updateSliderColor(this)">
+        <div style="text-align:center; font-size:0.7rem; color:var(--text-muted); margin-top:10px; font-family:'JetBrains Mono'">
+            Limit Entry @ <span id="limitPriceDisp">Waiting...</span>
+        </div>
+    </div>
+
+    <div class="results-container">
+        <div class="res-card market" onclick="copyResult('resLot1', this)">
+            <div class="res-header">
+                <span>1. Market Order</span>
+                <span id="riskDisp1">$0</span>
+            </div>
+            <div class="lot-size" id="resLot1">0.00</div>
+            <div class="res-footer">
+                <span>Tap to Copy</span>
+                <span class="copy-hint">COPIED!</span>
+            </div>
+        </div>
+
+        <div class="res-card limit" onclick="copyResult('resLot2', this)">
+            <div class="res-header">
+                <span>2. Limit Order</span>
+                <span id="riskDisp2">$0</span>
+            </div>
+            <div class="lot-size" id="resLot2">0.00</div>
+            <div class="res-footer">
+                <span>Price: <span id="limitPriceVal" style="color:white">0.00000</span></span>
+                <span class="copy-hint">COPIED!</span>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // --- Config ---
+    const ASSETS = {
+        'EURUSD': { type: 'direct', contract: 100000, tick: 0.00001, digits: 5 },
+        'GBPUSD': { type: 'direct', contract: 100000, tick: 0.00001, digits: 5 },
+        'USDJPY': { type: 'inverted', contract: 100000, tick: 0.001, digits: 3 },
+        'XAUUSD': { type: 'gold', contract: 100, tick: 0.01, digits: 2 }, 
+        'BTCUSD': { type: 'crypto', contract: 1, tick: 0.01, digits: 2 }
+    };
+
+    let state = { asset: 'EURUSD', riskMode: 'usd' };
+
+    // --- Init ---
+    function init() {
+        ['riskInput','balanceInput','commInput','entryPrice','stopPrice','splitSlider'].forEach(id => {
+            document.getElementById(id).addEventListener('input', calc);
+        });
+        updateSliderColor(document.getElementById('splitSlider'));
+        calc();
+    }
+
+    // --- Logic Functions ---
+    function setAsset(el, key) {
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        state.asset = key;
+        if(navigator.vibrate) navigator.vibrate(10);
+        calc();
+    }
+
+    function toggleRisk(mode) {
+        state.riskMode = mode;
+        document.getElementById('modeUSD').classList.toggle('active', mode === 'usd');
+        document.getElementById('modePct').classList.toggle('active', mode === 'pct');
+        
+        const balBox = document.getElementById('balanceBox');
+        if(mode === 'pct') {
+            balBox.style.display = 'block';
+            if(document.getElementById('riskInput').value > 100) document.getElementById('riskInput').value = 1; 
+        } else {
+            balBox.style.display = 'none';
+            if(document.getElementById('riskInput').value < 10) document.getElementById('riskInput').value = 200;
+        }
+        calc();
+    }
+
+    function updateSliderColor(el) {
+        el.style.setProperty('--ratio', el.value + '%');
+    }
+
+    function getTickValue(assetKey, price) {
+        const data = ASSETS[assetKey];
+        if(!data) return 1;
+        let val = data.contract * data.tick; // Base value
+        if(data.type === 'inverted' && price > 0) val = val / price;
+        return val;
+    }
+
+    function calc() {
+        // Inputs
+        let riskVal = parseFloat(document.getElementById('riskInput').value) || 0;
+        const comm = parseFloat(document.getElementById('commInput').value) || 0;
+        const entry = parseFloat(document.getElementById('entryPrice').value) || 0;
+        const stop = parseFloat(document.getElementById('stopPrice').value) || 0;
+        const split = parseInt(document.getElementById('splitSlider').value);
+        const data = ASSETS[state.asset];
+
+        // Mode Check
+        let finalRisk = riskVal;
+        if(state.riskMode === 'pct') {
+            const bal = parseFloat(document.getElementById('balanceInput').value) || 0;
+            finalRisk = bal * (riskVal / 100);
+        }
+
+        // Text Updates
+        document.getElementById('mktPct').innerText = split;
+        document.getElementById('lmtPct').innerText = 100 - split;
+
+        if(!entry || !stop || entry === stop) {
+            document.getElementById('limitPriceDisp').innerText = "Waiting for prices...";
+            return;
+        }
+
+        // Math
+        const tickVal = getTickValue(state.asset, entry);
+        document.getElementById('tickDebug').innerText = `1 pt ≈ $${tickVal.toFixed(2)}`;
+
+        const dist = Math.abs(entry - stop);
+        const points = dist / data.tick;
+        const lossPerLot = (points * tickVal) + comm;
+
+        const limitPrice = (entry + stop) / 2;
+        document.getElementById('limitPriceDisp').innerText = limitPrice.toFixed(data.digits);
+        document.getElementById('limitPriceVal').innerText = limitPrice.toFixed(data.digits);
+
+        const distLimit = Math.abs(limitPrice - stop);
+        const pointsLimit = distLimit / data.tick;
+        const lossPerLotLimit = (pointsLimit * tickVal) + comm;
+
+        // Lots
+        const r1 = finalRisk * (split / 100);
+        const r2 = finalRisk * ((100 - split) / 100);
+
+        const l1 = lossPerLot > 0 ? r1 / lossPerLot : 0;
+        const l2 = lossPerLotLimit > 0 ? r2 / lossPerLotLimit : 0;
+
+        // Render
+        document.getElementById('resLot1').innerText = l1.toFixed(2);
+        document.getElementById('resLot2').innerText = l2.toFixed(2);
+        document.getElementById('riskDisp1').innerText = `~$${r1.toFixed(0)}`;
+        document.getElementById('riskDisp2').innerText = `~$${r2.toFixed(0)}`;
+    }
+
+    // --- Utils ---
+    async function paste(id) {
+        try {
+            const text = await navigator.clipboard.readText();
+            // Allow dots and commas
+            const num = parseFloat(text.replace(',','.').replace(/[^0-9.]/g,''));
+            if(!isNaN(num)) {
+                document.getElementById(id).value = num;
+                if(navigator.vibrate) navigator.vibrate(20);
+                calc();
+            }
+        } catch(e) {}
+    }
+
+    function copyResult(id, cardEl) {
+        const txt = document.getElementById(id).innerText;
+        navigator.clipboard.writeText(txt);
+        
+        // Visual Feedback
+        if(navigator.vibrate) navigator.vibrate(50);
+        
+        // Blink effect handled by CSS active state mostly, but lets force hints
+        const hint = cardEl.querySelector('.copy-hint');
+        hint.style.opacity = '1';
+        setTimeout(() => hint.style.opacity = '0', 800);
+    }
+
+    init();
+
+</script>
+</body>
+</html>
