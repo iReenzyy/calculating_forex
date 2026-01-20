@@ -104,16 +104,27 @@
         .input-box {
             flex: 1;
             position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* NEW HEADER STYLE FOR SYMMETRY */
+        .input-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            height: 24px; /* Fixed height to ensure alignment */
         }
 
         label {
             display: block;
             font-size: 0.7rem;
             color: var(--text-muted);
-            margin-bottom: 6px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             font-weight: 600;
+            margin: 0; /* Margin handled by header */
         }
 
         input {
@@ -128,17 +139,18 @@
             box-sizing: border-box;
             transition: 0.2s;
             outline: none;
+            flex-grow: 1; /* Ensure inputs fill height */
         }
         input:focus {
             border-color: var(--accent-cyan);
             background: rgba(40, 40, 40, 0.8);
         }
 
-        /* Small Paste Icon inside Input */
+        /* Compact Paste Icon */
         .paste-icon {
             position: absolute;
             right: 12px;
-            top: 38px; /* Adjusted for label */
+            bottom: 14px; /* Align relative to bottom of input */
             opacity: 0.3;
             cursor: pointer;
             font-size: 1rem;
@@ -146,27 +158,25 @@
         }
         .paste-icon:hover { opacity: 1; color: var(--accent-cyan); }
 
-        /* --- Risk Switch --- */
+        /* --- Compact Risk Switch --- */
         .risk-switch {
             display: flex;
-            background: var(--input-bg);
-            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 6px;
             padding: 2px;
-            margin-bottom: 5px;
         }
         .switch-opt {
-            flex: 1;
-            text-align: center;
-            font-size: 0.75rem;
-            padding: 4px;
-            border-radius: 6px;
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 4px;
             color: var(--text-muted);
+            cursor: pointer;
             transition: 0.2s;
+            font-weight: 600;
         }
         .switch-opt.active {
-            background: #444;
-            color: white;
-            font-weight: bold;
+            background: var(--text-main);
+            color: #000;
         }
 
         /* --- Slider --- */
@@ -228,7 +238,6 @@
         }
         .res-card:active { transform: scale(0.98); }
 
-        /* Decoration glows */
         .res-card.market { border-left: 3px solid var(--accent-cyan); }
         .res-card.limit { border-left: 3px solid var(--success); }
 
@@ -289,33 +298,41 @@
     </div>
 
     <div class="grid-row">
+        
         <div class="input-box">
-            <div class="risk-switch">
-                <div class="switch-opt active" id="modeUSD" onclick="toggleRisk('usd')">$ USD</div>
-                <div class="switch-opt" id="modePct" onclick="toggleRisk('pct')">% DEP</div>
+            <div class="input-header">
+                <label>Risk</label>
+                <div class="risk-switch">
+                    <div class="switch-opt active" id="modeUSD" onclick="toggleRisk('usd')">$</div>
+                    <div class="switch-opt" id="modePct" onclick="toggleRisk('pct')">%</div>
+                </div>
             </div>
             <input type="number" id="riskInput" value="200" inputmode="decimal">
         </div>
         
         <div class="input-box" id="balanceBox" style="display:none">
-            <label>Balance</label>
+            <div class="input-header">
+                <label>Balance</label>
+            </div>
             <input type="number" id="balanceInput" value="10000" inputmode="decimal">
         </div>
 
         <div class="input-box">
-            <label>Comm ($)</label>
+            <div class="input-header">
+                <label>Comm ($)</label>
+            </div>
             <input type="number" id="commInput" value="7" inputmode="decimal">
         </div>
     </div>
 
     <div class="grid-row">
         <div class="input-box">
-            <label>Entry Price</label>
+            <div class="input-header"><label>Entry Price</label></div>
             <input type="number" id="entryPrice" placeholder="0.00000" step="any" inputmode="decimal">
             <span class="paste-icon" onclick="paste('entryPrice')">📋</span>
         </div>
         <div class="input-box">
-            <label>Stop Loss</label>
+            <div class="input-header"><label>Stop Loss</label></div>
             <input type="number" id="stopPrice" placeholder="0.00000" step="any" inputmode="decimal">
             <span class="paste-icon" onclick="paste('stopPrice')">📋</span>
         </div>
@@ -395,12 +412,14 @@
         document.getElementById('modePct').classList.toggle('active', mode === 'pct');
         
         const balBox = document.getElementById('balanceBox');
+        const riskInput = document.getElementById('riskInput');
+        
         if(mode === 'pct') {
-            balBox.style.display = 'block';
-            if(document.getElementById('riskInput').value > 100) document.getElementById('riskInput').value = 1; 
+            balBox.style.display = 'flex'; // Changed to flex to match input-box style
+            if(riskInput.value > 100) riskInput.value = 1; 
         } else {
             balBox.style.display = 'none';
-            if(document.getElementById('riskInput').value < 10) document.getElementById('riskInput').value = 200;
+            if(riskInput.value < 10) riskInput.value = 200;
         }
         calc();
     }
@@ -476,7 +495,6 @@
     async function paste(id) {
         try {
             const text = await navigator.clipboard.readText();
-            // Allow dots and commas
             const num = parseFloat(text.replace(',','.').replace(/[^0-9.]/g,''));
             if(!isNaN(num)) {
                 document.getElementById(id).value = num;
@@ -493,7 +511,6 @@
         // Visual Feedback
         if(navigator.vibrate) navigator.vibrate(50);
         
-        // Blink effect handled by CSS active state mostly, but lets force hints
         const hint = cardEl.querySelector('.copy-hint');
         hint.style.opacity = '1';
         setTimeout(() => hint.style.opacity = '0', 800);
