@@ -3,25 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Risk Terminal Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <title>Risk Terminal</title>
+    
+    <link rel="manifest" id="my-manifest">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/color/180/000000/bullish.png">
+
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
     <style>
         :root {
             --bg-color: #050505;
-            --card-bg: rgba(25, 25, 25, 0.6);
-            --input-bg: rgba(40, 40, 40, 0.4);
+            --card-bg: rgba(30, 30, 30, 0.7);
+            --input-bg: rgba(50, 50, 50, 0.5);
             --text-main: #ffffff;
             --text-muted: #888888;
             
             --accent-cyan: #00f2ea;
-            --accent-purple: #7b2cbf;
             --danger: #ff3b30;
             --success: #34c759;
             --gold: #ffd700;
             --btc: #f7931a;
 
             --glass-border: 1px solid rgba(255, 255, 255, 0.08);
-            --glow: 0 0 20px rgba(0, 242, 234, 0.15);
+            --glow: 0 0 30px rgba(0, 242, 234, 0.1);
         }
 
         body {
@@ -32,258 +38,155 @@
             padding: 20px;
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             box-sizing: border-box;
-            background-image: radial-gradient(circle at top right, rgba(0, 242, 234, 0.05), transparent 40%);
+            background-image: radial-gradient(circle at 50% 0%, #1a1a1a, #000);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- App Container --- */
+        .app-container {
+            width: 100%;
+            max-width: 460px;
+            background: rgba(15, 15, 15, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), var(--glow);
+            border: var(--glass-border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media (max-width: 500px) {
+            body { align-items: flex-start; padding: 10px; }
+            .app-container {
+                box-shadow: none; border: none; background: transparent; padding: 5px;
+            }
         }
 
         /* --- Header --- */
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
         }
         .brand {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 800;
-            font-size: 1.2rem;
-            letter-spacing: -1px;
-            background: linear-gradient(90deg, #fff, #888);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 1.1rem;
+            letter-spacing: -1px; background: linear-gradient(90deg, #fff, #999);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
         .tick-info {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            font-family: 'JetBrains Mono', monospace;
-            background: var(--input-bg);
-            padding: 4px 8px;
-            border-radius: 6px;
+            font-size: 0.7rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;
+            background: var(--input-bg); padding: 4px 8px; border-radius: 6px;
         }
 
         /* --- Asset Chips --- */
         .asset-scroll {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding-bottom: 5px;
-            margin-bottom: 20px;
+            display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; margin-bottom: 20px;
             scrollbar-width: none;
         }
         .asset-scroll::-webkit-scrollbar { display: none; }
-
         .chip {
-            background: var(--card-bg);
-            border: var(--glass-border);
-            color: var(--text-muted);
-            padding: 10px 18px;
-            border-radius: 14px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            white-space: nowrap;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            backdrop-filter: blur(10px);
+            background: var(--card-bg); border: var(--glass-border); color: var(--text-muted);
+            padding: 10px 16px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;
+            white-space: nowrap; cursor: pointer; transition: all 0.2s;
         }
         .chip.active {
-            background: var(--accent-cyan);
-            color: #000;
-            border-color: var(--accent-cyan);
-            box-shadow: var(--glow);
-            transform: translateY(-2px);
+            background: var(--accent-cyan); color: #000; border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 242, 234, 0.3);
         }
-        .chip[data-type="gold"].active { background: var(--gold); box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); }
-        .chip[data-type="crypto"].active { background: var(--btc); color: #fff; box-shadow: 0 0 20px rgba(247, 147, 26, 0.2); }
+        .chip[data-type="gold"].active { background: var(--gold); box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
+        .chip[data-type="crypto"].active { background: var(--btc); color: #fff; box-shadow: 0 0 15px rgba(247, 147, 26, 0.3); }
 
-        /* --- Input Grid --- */
-        .grid-row {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-        .input-box {
-            flex: 1;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* NEW HEADER STYLE FOR SYMMETRY */
+        /* --- Inputs --- */
+        .grid-row { display: flex; gap: 12px; margin-bottom: 12px; }
+        .input-box { flex: 1; position: relative; display: flex; flex-direction: column; }
+        
         .input-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-            height: 24px; /* Fixed height to ensure alignment */
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; height: 20px;
         }
-
-        label {
-            display: block;
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
-            margin: 0; /* Margin handled by header */
-        }
+        
+        label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin: 0; }
 
         input {
-            width: 100%;
-            background: var(--input-bg);
-            border: var(--glass-border);
-            color: white;
-            padding: 14px 12px;
-            border-radius: 12px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.1rem;
-            box-sizing: border-box;
-            transition: 0.2s;
-            outline: none;
-            flex-grow: 1; /* Ensure inputs fill height */
+            width: 100%; background: var(--input-bg); border: var(--glass-border); color: white;
+            padding: 12px; border-radius: 10px; font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem; box-sizing: border-box; outline: none; transition: 0.2s; flex-grow: 1;
         }
-        input:focus {
-            border-color: var(--accent-cyan);
-            background: rgba(40, 40, 40, 0.8);
-        }
+        input:focus { border-color: var(--accent-cyan); background: rgba(60, 60, 60, 0.8); }
 
-        /* Compact Paste Icon */
         .paste-icon {
-            position: absolute;
-            right: 12px;
-            bottom: 14px; /* Align relative to bottom of input */
-            opacity: 0.3;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: 0.2s;
+            position: absolute; right: 10px; bottom: 12px; opacity: 0.4; cursor: pointer; font-size: 0.9rem;
         }
         .paste-icon:hover { opacity: 1; color: var(--accent-cyan); }
 
-        /* --- Compact Risk Switch --- */
+        /* --- Risk Switch --- */
         .risk-switch {
-            display: flex;
-            background: rgba(255,255,255,0.1);
-            border-radius: 6px;
-            padding: 2px;
+            display: flex; background: rgba(255,255,255,0.1); border-radius: 4px; padding: 2px;
         }
         .switch-opt {
-            font-size: 0.65rem;
-            padding: 2px 8px;
-            border-radius: 4px;
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: 0.2s;
-            font-weight: 600;
+            font-size: 0.6rem; padding: 2px 6px; border-radius: 3px; color: var(--text-muted); cursor: pointer; font-weight: 700;
         }
-        .switch-opt.active {
-            background: var(--text-main);
-            color: #000;
-        }
+        .switch-opt.active { background: #fff; color: #000; }
 
-        /* --- Slider --- */
-        .slider-section {
-            background: var(--card-bg);
-            border: var(--glass-border);
-            padding: 20px;
-            border-radius: 16px;
-            margin: 25px 0;
-            backdrop-filter: blur(10px);
+        /* --- Visual & Slider --- */
+        .visual-section {
+            background: var(--card-bg); border: var(--glass-border); padding: 20px;
+            border-radius: 16px; margin: 20px 0;
         }
         
+        canvas {
+            width: 100%; height: 90px; background: rgba(0,0,0,0.3); border-radius: 8px;
+            margin: 15px 0 5px 0; border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Slider */
         input[type=range] {
-            -webkit-appearance: none;
-            width: 100%;
-            background: transparent;
-            margin-top: 10px;
-            border: none;
-            padding: 0;
+            -webkit-appearance: none; width: 100%; background: transparent; margin: 15px 0 5px 0; padding: 0;
         }
         input[type=range]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 6px;
+            width: 100%; height: 6px; border-radius: 3px;
             background: linear-gradient(90deg, var(--accent-cyan) var(--ratio, 60%), #333 var(--ratio, 60%));
-            border-radius: 3px;
         }
         input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 22px;
-            width: 22px;
-            border-radius: 50%;
-            background: #fff;
-            box-shadow: 0 0 15px rgba(255,255,255,0.5);
-            margin-top: -8px;
-            cursor: pointer;
+            -webkit-appearance: none; height: 22px; width: 22px; border-radius: 50%;
+            background: #fff; cursor: pointer; margin-top: -8px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
 
-        .split-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.85rem;
-            font-weight: 700;
-        }
+        .slider-label { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 600; }
 
-        /* --- Results Area --- */
-        .results-container {
-            display: grid;
-            gap: 15px;
-        }
-
+        /* --- Results --- */
+        .results-grid { display: grid; gap: 12px; }
         .res-card {
-            background: var(--card-bg);
-            border: var(--glass-border);
-            border-radius: 16px;
-            padding: 20px;
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.1s;
+            background: var(--card-bg); border: var(--glass-border); border-radius: 14px;
+            padding: 15px 20px; position: relative; cursor: pointer; transition: transform 0.1s;
         }
-        .res-card:active { transform: scale(0.98); }
-
+        .res-card:active { transform: scale(0.98); background: rgba(255,255,255,0.05); }
         .res-card.market { border-left: 3px solid var(--accent-cyan); }
         .res-card.limit { border-left: 3px solid var(--success); }
-
-        .res-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            margin-bottom: 5px;
-            font-weight: 600;
-        }
         
-        .lot-size {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: white;
-            line-height: 1.1;
+        .res-top { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 5px; }
+        .res-val {
+            font-family: 'JetBrains Mono', monospace; font-size: 2.2rem; font-weight: 700; color: #fff; line-height: 1;
         }
-        .res-card.limit .lot-size { color: var(--success); }
-
-        .res-footer {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.85rem;
-            color: var(--text-muted);
+        .res-card.limit .res-val { color: var(--success); }
+        .res-sub {
+            margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.8rem; color: var(--text-muted); display: flex; justify-content: space-between;
         }
-        
-        .copy-hint {
-            font-size: 0.7rem;
-            background: rgba(255,255,255,0.1);
-            padding: 4px 8px;
-            border-radius: 4px;
-            opacity: 0;
-            transition: opacity 0.2s;
+        .copied-tooltip {
+            position: absolute; right: 20px; top: 20px; background: var(--success); color: #000;
+            padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold;
+            opacity: 0; transition: opacity 0.2s; pointer-events: none;
         }
-        .res-card:active .copy-hint { opacity: 1; }
 
     </style>
 </head>
 <body>
 
+<div class="app-container">
+    
     <div class="header">
         <div class="brand">RISK//TERMINAL</div>
         <div class="tick-info" id="tickDebug">Tick: $1.00</div>
@@ -298,7 +201,6 @@
     </div>
 
     <div class="grid-row">
-        
         <div class="input-box">
             <div class="input-header">
                 <label>Risk</label>
@@ -311,16 +213,12 @@
         </div>
         
         <div class="input-box" id="balanceBox" style="display:none">
-            <div class="input-header">
-                <label>Balance</label>
-            </div>
+            <div class="input-header"><label>Balance</label></div>
             <input type="number" id="balanceInput" value="10000" inputmode="decimal">
         </div>
 
         <div class="input-box">
-            <div class="input-header">
-                <label>Comm ($)</label>
-            </div>
+            <div class="input-header"><label>Comm ($)</label></div>
             <input type="number" id="commInput" value="7" inputmode="decimal">
         </div>
     </div>
@@ -338,71 +236,79 @@
         </div>
     </div>
 
-    <div class="slider-section">
-        <div class="split-labels">
+    <div class="visual-section">
+        <div class="slider-label">
             <span style="color:var(--accent-cyan)">MARKET <span id="mktPct">60</span>%</span>
-            <span style="color:var(--text-muted)">//</span>
+            <span style="color:var(--text-muted)">AGGRESSIVE // CONSERVATIVE</span>
             <span style="color:var(--success)">LIMIT <span id="lmtPct">40</span>%</span>
         </div>
-        <input type="range" id="splitSlider" min="0" max="100" value="60" oninput="updateSliderColor(this)">
-        <div style="text-align:center; font-size:0.7rem; color:var(--text-muted); margin-top:10px; font-family:'JetBrains Mono'">
-            Limit Entry @ <span id="limitPriceDisp">Waiting...</span>
+
+        <input type="range" id="splitSlider" min="0" max="100" value="60" oninput="calc()">
+        
+        <canvas id="tradeCanvas" width="800" height="200"></canvas>
+        <div style="text-align:center; font-size:0.7rem; color:var(--text-muted);">
+            Limit Price adjusts based on Risk Split
         </div>
     </div>
 
-    <div class="results-container">
+    <div class="results-grid">
         <div class="res-card market" onclick="copyResult('resLot1', this)">
-            <div class="res-header">
-                <span>1. Market Order</span>
-                <span id="riskDisp1">$0</span>
+            <div class="copied-tooltip">COPIED</div>
+            <div class="res-top">
+                <span>1. Market Order</span> <span id="riskDisp1">$0</span>
             </div>
-            <div class="lot-size" id="resLot1">0.00</div>
-            <div class="res-footer">
-                <span>Tap to Copy</span>
-                <span class="copy-hint">COPIED!</span>
-            </div>
+            <div class="res-val" id="resLot1">0.00</div>
         </div>
 
         <div class="res-card limit" onclick="copyResult('resLot2', this)">
-            <div class="res-header">
-                <span>2. Limit Order</span>
-                <span id="riskDisp2">$0</span>
+            <div class="copied-tooltip">COPIED</div>
+            <div class="res-top">
+                <span>2. Limit Order</span> <span id="riskDisp2">$0</span>
             </div>
-            <div class="lot-size" id="resLot2">0.00</div>
-            <div class="res-footer">
-                <span>Price: <span id="limitPriceVal" style="color:white">0.00000</span></span>
-                <span class="copy-hint">COPIED!</span>
+            <div class="res-val" id="resLot2">0.00</div>
+            <div class="res-sub">
+                <span>Limit Price:</span> <span style="color:#fff; font-weight:bold" id="limitPriceVal">0.00000</span>
             </div>
         </div>
     </div>
 
+</div>
+
 <script>
-    // --- Config ---
+    // --- 1. PWA GENERATOR ---
+    const manifest = {
+        name: "Risk Terminal",
+        short_name: "RiskCalc",
+        start_url: ".",
+        display: "standalone",
+        background_color: "#050505",
+        theme_color: "#050505",
+        icons: [{ src: "https://img.icons8.com/color/180/000000/bullish.png", sizes: "192x192", type: "image/png" }]
+    };
+    const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+    document.getElementById('my-manifest').setAttribute('href', URL.createObjectURL(blob));
+
+    // --- 2. LOGIC CORE ---
     const ASSETS = {
         'EURUSD': { type: 'direct', contract: 100000, tick: 0.00001, digits: 5 },
         'GBPUSD': { type: 'direct', contract: 100000, tick: 0.00001, digits: 5 },
         'USDJPY': { type: 'inverted', contract: 100000, tick: 0.001, digits: 3 },
-        'XAUUSD': { type: 'gold', contract: 100, tick: 0.01, digits: 2 }, 
+        'XAUUSD': { type: 'gold', contract: 100, tick: 0.01, digits: 2 },
         'BTCUSD': { type: 'crypto', contract: 1, tick: 0.01, digits: 2 }
     };
-
     let state = { asset: 'EURUSD', riskMode: 'usd' };
 
-    // --- Init ---
     function init() {
-        ['riskInput','balanceInput','commInput','entryPrice','stopPrice','splitSlider'].forEach(id => {
+        ['riskInput','balanceInput','commInput','entryPrice','stopPrice'].forEach(id => {
             document.getElementById(id).addEventListener('input', calc);
         });
-        updateSliderColor(document.getElementById('splitSlider'));
         calc();
     }
 
-    // --- Logic Functions ---
     function setAsset(el, key) {
         document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
         el.classList.add('active');
         state.asset = key;
-        if(navigator.vibrate) navigator.vibrate(10);
         calc();
     }
 
@@ -410,88 +316,140 @@
         state.riskMode = mode;
         document.getElementById('modeUSD').classList.toggle('active', mode === 'usd');
         document.getElementById('modePct').classList.toggle('active', mode === 'pct');
-        
         const balBox = document.getElementById('balanceBox');
-        const riskInput = document.getElementById('riskInput');
-        
-        if(mode === 'pct') {
-            balBox.style.display = 'flex'; // Changed to flex to match input-box style
-            if(riskInput.value > 100) riskInput.value = 1; 
-        } else {
-            balBox.style.display = 'none';
-            if(riskInput.value < 10) riskInput.value = 200;
-        }
+        balBox.style.display = mode === 'pct' ? 'flex' : 'none';
         calc();
-    }
-
-    function updateSliderColor(el) {
-        el.style.setProperty('--ratio', el.value + '%');
     }
 
     function getTickValue(assetKey, price) {
         const data = ASSETS[assetKey];
         if(!data) return 1;
-        let val = data.contract * data.tick; // Base value
+        let val = data.contract * data.tick;
         if(data.type === 'inverted' && price > 0) val = val / price;
         return val;
     }
 
     function calc() {
-        // Inputs
+        // Read Inputs
         let riskVal = parseFloat(document.getElementById('riskInput').value) || 0;
         const comm = parseFloat(document.getElementById('commInput').value) || 0;
         const entry = parseFloat(document.getElementById('entryPrice').value) || 0;
         const stop = parseFloat(document.getElementById('stopPrice').value) || 0;
+        
+        // Slider Logic
         const split = parseInt(document.getElementById('splitSlider').value);
-        const data = ASSETS[state.asset];
+        
+        // --- THE MAGIC LOGIC ---
+        // Retracement Depth is inverse to Market Aggression.
+        // If Split is 100 (All Market), Retracement is 0 (At Entry).
+        // If Split is 0 (All Limit), Retracement is 100 (At Stop).
+        const retreat = 100 - split; 
 
-        // Mode Check
+        // Visual Updates
+        document.getElementById('splitSlider').style.setProperty('--ratio', split + '%');
+        document.getElementById('mktPct').innerText = split;
+        document.getElementById('lmtPct').innerText = 100 - split;
+
+        const data = ASSETS[state.asset];
         let finalRisk = riskVal;
         if(state.riskMode === 'pct') {
             const bal = parseFloat(document.getElementById('balanceInput').value) || 0;
             finalRisk = bal * (riskVal / 100);
         }
 
-        // Text Updates
-        document.getElementById('mktPct').innerText = split;
-        document.getElementById('lmtPct').innerText = 100 - split;
+        if(entry && stop && entry !== stop) {
+            const tickVal = getTickValue(state.asset, entry);
+            document.getElementById('tickDebug').innerText = `Tick: $${tickVal.toFixed(2)}`;
 
-        if(!entry || !stop || entry === stop) {
-            document.getElementById('limitPriceDisp').innerText = "Waiting for prices...";
+            // Limit Price Math based on Split
+            const limitPrice = entry + (stop - entry) * (retreat / 100);
+            
+            // Lots
+            const dist = Math.abs(entry - stop);
+            const lossPerLot = ((dist / data.tick) * tickVal) + comm;
+            
+            const distLimit = Math.abs(limitPrice - stop);
+            const lossPerLotLimit = ((distLimit / data.tick) * tickVal) + comm;
+
+            const r1 = finalRisk * (split / 100);
+            const r2 = finalRisk * ((100 - split) / 100);
+
+            const l1 = lossPerLot > 0 ? r1 / lossPerLot : 0;
+            const l2 = lossPerLotLimit > 0 ? r2 / lossPerLotLimit : 0;
+
+            // Display
+            document.getElementById('resLot1').innerText = l1.toFixed(2);
+            document.getElementById('resLot2').innerText = l2.toFixed(2);
+            document.getElementById('riskDisp1').innerText = `~$${r1.toFixed(0)}`;
+            document.getElementById('riskDisp2').innerText = `~$${r2.toFixed(0)}`;
+            document.getElementById('limitPriceVal').innerText = limitPrice.toFixed(data.digits);
+
+            drawVisuals(entry, stop, limitPrice);
+        } else {
+             drawVisuals(0, 0, 0, true);
+        }
+    }
+
+    // --- CANVAS RENDERER ---
+    function drawVisuals(entry, stop, limit, isEmpty = false) {
+        const c = document.getElementById('tradeCanvas');
+        const ctx = c.getContext('2d');
+        const w = c.width;
+        const h = c.height;
+
+        ctx.clearRect(0, 0, w, h);
+
+        if(isEmpty) {
+            ctx.fillStyle = "#333";
+            ctx.font = "30px Inter";
+            ctx.textAlign = "center";
+            ctx.fillText("ENTER PRICES", w/2, h/2 + 10);
             return;
         }
 
-        // Math
-        const tickVal = getTickValue(state.asset, entry);
-        document.getElementById('tickDebug').innerText = `1 pt ≈ $${tickVal.toFixed(2)}`;
+        const maxP = Math.max(entry, stop);
+        const minP = Math.min(entry, stop);
+        const range = maxP - minP;
+        const padding = range * 0.3; // More padding for labels
 
-        const dist = Math.abs(entry - stop);
-        const points = dist / data.tick;
-        const lossPerLot = (points * tickVal) + comm;
+        const mapY = (p) => {
+            return ((maxP + padding - p) / (range + padding * 2)) * h;
+        };
 
-        const limitPrice = (entry + stop) / 2;
-        document.getElementById('limitPriceDisp').innerText = limitPrice.toFixed(data.digits);
-        document.getElementById('limitPriceVal').innerText = limitPrice.toFixed(data.digits);
+        const yEntry = mapY(entry);
+        const yStop = mapY(stop);
+        const yLimit = mapY(limit);
 
-        const distLimit = Math.abs(limitPrice - stop);
-        const pointsLimit = distLimit / data.tick;
-        const lossPerLotLimit = (pointsLimit * tickVal) + comm;
+        const line = (y, color, width, dash = []) => {
+            ctx.beginPath(); ctx.lineWidth = width; ctx.strokeStyle = color; ctx.setLineDash(dash);
+            ctx.moveTo(20, y); ctx.lineTo(w - 20, y); ctx.stroke();
+        };
+        const circle = (y, color) => {
+            ctx.beginPath(); ctx.arc(w - 20, y, 6, 0, 2 * Math.PI); ctx.fillStyle = color; ctx.fill();
+        };
 
-        // Lots
-        const r1 = finalRisk * (split / 100);
-        const r2 = finalRisk * ((100 - split) / 100);
+        // Draw STOP
+        line(yStop, '#ff3b30', 4);
+        circle(yStop, '#ff3b30');
+        ctx.fillStyle = '#ff3b30'; ctx.font = "bold 24px Inter"; ctx.textAlign = "left";
+        ctx.fillText("SL", 25, yStop - 10);
 
-        const l1 = lossPerLot > 0 ? r1 / lossPerLot : 0;
-        const l2 = lossPerLotLimit > 0 ? r2 / lossPerLotLimit : 0;
+        // Draw ENTRY
+        line(yEntry, '#00f2ea', 4);
+        circle(yEntry, '#00f2ea');
+        ctx.fillStyle = '#00f2ea'; ctx.fillText("ENTRY", 25, yEntry - 10);
 
-        // Render
-        document.getElementById('resLot1').innerText = l1.toFixed(2);
-        document.getElementById('resLot2').innerText = l2.toFixed(2);
-        document.getElementById('riskDisp1').innerText = `~$${r1.toFixed(0)}`;
-        document.getElementById('riskDisp2').innerText = `~$${r2.toFixed(0)}`;
+        // Draw LIMIT (Moving)
+        line(yLimit, '#34c759', 3, [10, 10]);
+        circle(yLimit, '#34c759');
+        ctx.fillStyle = '#34c759'; ctx.fillText("LIMIT", 25, yLimit - 10);
+        
+        // Zone Fill
+        ctx.globalAlpha = 0.1; ctx.fillStyle = '#ff3b30';
+        ctx.fillRect(20, Math.min(yStop, yEntry), w-40, Math.abs(yStop - yEntry));
+        ctx.globalAlpha = 1.0;
     }
 
-    // --- Utils ---
     async function paste(id) {
         try {
             const text = await navigator.clipboard.readText();
@@ -507,17 +465,13 @@
     function copyResult(id, cardEl) {
         const txt = document.getElementById(id).innerText;
         navigator.clipboard.writeText(txt);
-        
-        // Visual Feedback
-        if(navigator.vibrate) navigator.vibrate(50);
-        
-        const hint = cardEl.querySelector('.copy-hint');
-        hint.style.opacity = '1';
-        setTimeout(() => hint.style.opacity = '0', 800);
+        if(navigator.vibrate) navigator.vibrate(40);
+        const tip = cardEl.querySelector('.copied-tooltip');
+        tip.style.opacity = '1';
+        setTimeout(() => tip.style.opacity = '0', 1000);
     }
 
     init();
-
 </script>
 </body>
 </html>
