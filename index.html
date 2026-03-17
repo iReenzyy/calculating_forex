@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Risk Terminal Global</title>
+    <title>Risk Terminal Pro</title>
     
     <link rel="manifest" id="my-manifest">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -11,6 +11,8 @@
     <link rel="apple-touch-icon" href="https://img.icons8.com/color/180/000000/bullish.png">
 
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 
     <style>
         :root {
@@ -20,7 +22,6 @@
             --text-main: #ffffff;
             --text-muted: #888888;
             
-            /* Brighter, but still soft Glassmorphism */
             --accent-cyan: #1cd4cb; 
             --danger: #ff5c5c;
             --success: #3be37f;
@@ -38,21 +39,41 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* --- App Container --- */
+        /* --- Global Layout --- */
+        .main-wrapper {
+            display: flex; gap: 20px; width: 100%; max-width: 1400px; 
+            align-items: stretch; justify-content: center;
+        }
+
+        /* --- App Container (Calculator) --- */
         .app-container {
-            width: 100%; max-width: 460px; background: rgba(15, 15, 15, 0.6);
+            width: 100%; max-width: 460px; min-width: 320px; background: rgba(15, 15, 15, 0.6);
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border-radius: 24px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.5), var(--glow);
             border: var(--glass-border); position: relative; overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+
+        /* --- TradingView Chart Container (Desktop Only) --- */
+        .chart-container {
+            display: none; flex-grow: 1; background: rgba(13, 13, 13, 0.8);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border: var(--glass-border); overflow: hidden; position: relative;
+        }
+
+        @media (min-width: 1024px) {
+            .chart-container { display: block; } /* Show only on PC/Tablets */
         }
 
         @media (max-width: 500px) {
             body { align-items: flex-start; padding: 10px; }
             .app-container { box-shadow: none; border: none; background: transparent; padding: 5px; }
+            .main-wrapper { gap: 0; }
         }
 
         /* --- Header & Lang Switch --- */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-shrink: 0;}
         .brand {
             font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 1.1rem;
             letter-spacing: -1px; background: linear-gradient(90deg, #fff, #999);
@@ -66,10 +87,10 @@
         }
         .lang-opt.active { background: rgba(28, 212, 203, 0.2); color: var(--accent-cyan); }
 
-        /* --- Asset Chips (Dynamic Auto-scroll) --- */
+        /* --- Asset Chips --- */
         .asset-scroll { 
             display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; 
-            scrollbar-width: none; cursor: grab;
+            scrollbar-width: none; cursor: grab; flex-shrink: 0;
         }
         .asset-scroll:active { cursor: grabbing; }
         .asset-scroll::-webkit-scrollbar { display: none; }
@@ -80,7 +101,6 @@
             white-space: nowrap; cursor: pointer; transition: all 0.2s; user-select: none;
         }
         
-        /* Glassy Active States (Brighter) */
         .chip.active { 
             background: rgba(28, 212, 203, 0.15); color: var(--accent-cyan); 
             border-color: rgba(28, 212, 203, 0.5); box-shadow: 0 0 15px rgba(28, 212, 203, 0.15); 
@@ -90,7 +110,7 @@
         .chip[data-type="custom"] { border: 1px dashed rgba(255,255,255,0.25); }
 
         /* --- Inputs --- */
-        .grid-row { display: flex; gap: 12px; margin-bottom: 12px; }
+        .grid-row { display: flex; gap: 12px; margin-bottom: 12px; flex-shrink: 0;}
         .input-box { flex: 1; position: relative; display: flex; flex-direction: column; }
         .input-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; height: 20px; }
         label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin: 0; }
@@ -109,8 +129,8 @@
         .switch-opt { font-size: 0.6rem; padding: 2px 6px; border-radius: 3px; color: var(--text-muted); cursor: pointer; font-weight: 700; transition: 0.2s;}
         .switch-opt.active { background: rgba(255,255,255,0.9); color: #000; }
 
-        /* --- Visual & Glassy Slider --- */
-        .visual-section { background: var(--card-bg); border: var(--glass-border); padding: 20px; border-radius: 16px; margin: 20px 0; }
+        /* --- Visual & Slider --- */
+        .visual-section { background: var(--card-bg); border: var(--glass-border); padding: 20px; border-radius: 16px; margin: 20px 0; flex-shrink: 0;}
         canvas { width: 100%; height: 90px; background: rgba(0,0,0,0.2); border-radius: 8px; margin: 15px 0 5px 0; border: 1px solid rgba(255,255,255,0.03); }
 
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; margin: 15px 0 5px 0; padding: 0; }
@@ -126,7 +146,7 @@
         .slider-label { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 600; }
 
         /* --- Results --- */
-        .results-grid { display: grid; gap: 12px; }
+        .results-grid { display: grid; gap: 12px; flex-shrink: 0;}
         .res-card { background: var(--card-bg); border: var(--glass-border); border-radius: 14px; padding: 15px 20px; position: relative; cursor: pointer; transition: transform 0.1s; }
         .res-card:active { transform: scale(0.98); background: rgba(255,255,255,0.05); }
         .res-card.market { border-left: 3px solid var(--accent-cyan); }
@@ -143,6 +163,7 @@
             padding: 10px 24px; border-radius: 20px; font-weight: 600; font-size: 0.75rem; 
             border: var(--glass-border); margin: 25px auto 0; cursor: pointer; display: flex; 
             align-items: center; justify-content: center; gap: 8px; transition: 0.2s; backdrop-filter: blur(5px);
+            flex-shrink: 0;
         }
         .btn-journal:hover { background: rgba(255, 255, 255, 0.15); color: var(--text-main); }
         .btn-journal:active { transform: scale(0.95); }
@@ -161,9 +182,7 @@
             transform: translateY(20px); transition: 0.3s; backdrop-filter: blur(15px);
         }
         .modal-overlay.active .modal-card { transform: translateY(0); }
-        
         .modal-title { font-weight: 800; margin-bottom: 20px; color: var(--accent-cyan); font-family: 'JetBrains Mono'; text-transform: uppercase;}
-        
         .modal-btn { 
             background: rgba(28, 212, 203, 0.15); color: var(--accent-cyan); 
             border: 1px solid rgba(28, 212, 203, 0.4); width: 100%; padding: 12px; 
@@ -171,7 +190,6 @@
             cursor: pointer; transition: 0.2s; 
         }
         .modal-btn:hover { background: rgba(28, 212, 203, 0.3); }
-        
         .modal-close { position: absolute; right: 20px; top: 20px; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; line-height: 1; transition: 0.2s;}
         .modal-close:hover { color: #fff; }
 
@@ -179,99 +197,103 @@
 </head>
 <body>
 
-<div class="app-container">
-    
-    <div class="header">
-        <div class="brand" data-i18n="app_title">RISK//TERMINAL</div>
-        <div class="lang-switch">
-            <div class="lang-opt active" id="langEN" onclick="setLang('en')">EN</div>
-            <div class="lang-opt" id="langRU" onclick="setLang('ru')">RU</div>
+<div class="main-wrapper">
+    <div class="app-container">
+        
+        <div class="header">
+            <div class="brand" data-i18n="app_title">RISK//TERMINAL</div>
+            <div class="lang-switch">
+                <div class="lang-opt active" id="langEN" onclick="setLang('en')">EN</div>
+                <div class="lang-opt" id="langRU" onclick="setLang('ru')">RU</div>
+            </div>
         </div>
-    </div>
 
-    <div class="asset-scroll" id="assetSlider">
-        <div class="chip active" onclick="setAsset(this, 'EURUSD')">EURUSD</div>
-        <div class="chip" onclick="setAsset(this, 'GBPUSD')">GBPUSD</div>
-        <div class="chip" onclick="setAsset(this, 'USDJPY')">USDJPY</div>
-        <div class="chip" data-type="gold" onclick="setAsset(this, 'XAUUSD')">GOLD</div>
-        <div class="chip" data-type="crypto" onclick="setAsset(this, 'BTCUSD')">BTC</div>
-        <div class="chip" data-type="custom" id="customChipBtn" onclick="openCustomModal()">⚙️ CUSTOM</div>
-    </div>
+        <div class="asset-scroll" id="assetSlider">
+            <div class="chip active" onclick="setAsset(this, 'EURUSD')">EURUSD</div>
+            <div class="chip" onclick="setAsset(this, 'GBPUSD')">GBPUSD</div>
+            <div class="chip" onclick="setAsset(this, 'USDJPY')">USDJPY</div>
+            <div class="chip" data-type="gold" onclick="setAsset(this, 'XAUUSD')">GOLD</div>
+            <div class="chip" data-type="crypto" onclick="setAsset(this, 'BTCUSD')">BTC</div>
+            <div class="chip" data-type="custom" id="customChipBtn" onclick="openCustomModal()">⚙️ CUSTOM</div>
+        </div>
 
-    <div class="grid-row">
-        <div class="input-box">
-            <div class="input-header">
-                <label data-i18n="risk_label">Risk</label>
-                <div class="risk-switch">
-                    <div class="switch-opt active" id="modeUSD" onclick="toggleRisk('usd')">$</div>
-                    <div class="switch-opt" id="modePct" onclick="toggleRisk('pct')">%</div>
+        <div class="grid-row">
+            <div class="input-box">
+                <div class="input-header">
+                    <label data-i18n="risk_label">Risk</label>
+                    <div class="risk-switch">
+                        <div class="switch-opt active" id="modeUSD" onclick="toggleRisk('usd')">$</div>
+                        <div class="switch-opt" id="modePct" onclick="toggleRisk('pct')">%</div>
+                    </div>
+                </div>
+                <input type="number" id="riskInput" value="200" inputmode="decimal">
+            </div>
+            
+            <div class="input-box" id="balanceBox" style="display:none">
+                <div class="input-header"><label data-i18n="balance_label">Balance</label></div>
+                <input type="number" id="balanceInput" value="10000" inputmode="decimal">
+            </div>
+
+            <div class="input-box">
+                <div class="input-header"><label data-i18n="comm_label">Comm ($)</label></div>
+                <input type="number" id="commInput" value="7" inputmode="decimal">
+            </div>
+        </div>
+
+        <div class="grid-row">
+            <div class="input-box">
+                <div class="input-header"><label data-i18n="entry_label">Entry Price</label></div>
+                <input type="number" id="entryPrice" placeholder="0.00000" step="any" inputmode="decimal">
+                <span class="paste-icon" onclick="paste('entryPrice')">📋</span>
+            </div>
+            <div class="input-box">
+                <div class="input-header"><label data-i18n="stop_label">Stop Loss</label></div>
+                <input type="number" id="stopPrice" placeholder="0.00000" step="any" inputmode="decimal">
+                <span class="paste-icon" onclick="paste('stopPrice')">📋</span>
+            </div>
+        </div>
+
+        <div class="visual-section">
+            <div class="slider-label">
+                <span style="color:var(--accent-cyan)"><span data-i18n="lbl_market">MARKET</span> <span id="mktPct">60</span>%</span>
+                <span style="color:var(--success)"><span data-i18n="lbl_limit">LIMIT</span> <span id="lmtPct">40</span>%</span>
+            </div>
+            <input type="range" id="splitSlider" min="0" max="100" value="60" oninput="calc()">
+            
+            <canvas id="tradeCanvas" width="800" height="200"></canvas>
+            <div style="text-align:center; font-size:0.7rem; color:var(--text-muted);" data-i18n="limit_hint">
+                Limit Price adjusts based on Risk Split
+            </div>
+        </div>
+
+        <div class="results-grid">
+            <div class="res-card market" onclick="copyResult('resLot1', this)">
+                <div class="copied-tooltip" data-i18n="copied">COPIED</div>
+                <div class="res-top">
+                    <span data-i18n="mkt_order">1. Market Order</span> <span id="riskDisp1">$0</span>
+                </div>
+                <div class="res-val" id="resLot1">0.00</div>
+            </div>
+
+            <div class="res-card limit" onclick="copyResult('resLot2', this)">
+                <div class="copied-tooltip" data-i18n="copied">COPIED</div>
+                <div class="res-top">
+                    <span data-i18n="lmt_order">2. Limit Order</span> <span id="riskDisp2">$0</span>
+                </div>
+                <div class="res-val" id="resLot2">0.00</div>
+                <div class="res-sub">
+                    <span data-i18n="limit_price">Limit Price:</span> <span style="color:#fff; font-weight:bold" id="limitPriceVal">0.00000</span>
                 </div>
             </div>
-            <input type="number" id="riskInput" value="200" inputmode="decimal">
-        </div>
-        
-        <div class="input-box" id="balanceBox" style="display:none">
-            <div class="input-header"><label data-i18n="balance_label">Balance</label></div>
-            <input type="number" id="balanceInput" value="10000" inputmode="decimal">
         </div>
 
-        <div class="input-box">
-            <div class="input-header"><label data-i18n="comm_label">Comm ($)</label></div>
-            <input type="number" id="commInput" value="7" inputmode="decimal">
-        </div>
+        <button class="btn-journal" onclick="saveTradeCard()">
+            📸 <span data-i18n="save_card">SAVE TRADE CARD</span>
+        </button>
     </div>
 
-    <div class="grid-row">
-        <div class="input-box">
-            <div class="input-header"><label data-i18n="entry_label">Entry Price</label></div>
-            <input type="number" id="entryPrice" placeholder="0.00000" step="any" inputmode="decimal">
-            <span class="paste-icon" onclick="paste('entryPrice')">📋</span>
+    <div class="chart-container" id="tv_chart_container">
         </div>
-        <div class="input-box">
-            <div class="input-header"><label data-i18n="stop_label">Stop Loss</label></div>
-            <input type="number" id="stopPrice" placeholder="0.00000" step="any" inputmode="decimal">
-            <span class="paste-icon" onclick="paste('stopPrice')">📋</span>
-        </div>
-    </div>
-
-    <div class="visual-section">
-        <div class="slider-label">
-            <span style="color:var(--accent-cyan)"><span data-i18n="lbl_market">MARKET</span> <span id="mktPct">60</span>%</span>
-            <span style="color:var(--success)"><span data-i18n="lbl_limit">LIMIT</span> <span id="lmtPct">40</span>%</span>
-        </div>
-        <input type="range" id="splitSlider" min="0" max="100" value="60" oninput="calc()">
-        
-        <canvas id="tradeCanvas" width="800" height="200"></canvas>
-        <div style="text-align:center; font-size:0.7rem; color:var(--text-muted);" data-i18n="limit_hint">
-            Limit Price adjusts based on Risk Split
-        </div>
-    </div>
-
-    <div class="results-grid">
-        <div class="res-card market" onclick="copyResult('resLot1', this)">
-            <div class="copied-tooltip" data-i18n="copied">COPIED</div>
-            <div class="res-top">
-                <span data-i18n="mkt_order">1. Market Order</span> <span id="riskDisp1">$0</span>
-            </div>
-            <div class="res-val" id="resLot1">0.00</div>
-        </div>
-
-        <div class="res-card limit" onclick="copyResult('resLot2', this)">
-            <div class="copied-tooltip" data-i18n="copied">COPIED</div>
-            <div class="res-top">
-                <span data-i18n="lmt_order">2. Limit Order</span> <span id="riskDisp2">$0</span>
-            </div>
-            <div class="res-val" id="resLot2">0.00</div>
-            <div class="res-sub">
-                <span data-i18n="limit_price">Limit Price:</span> <span style="color:#fff; font-weight:bold" id="limitPriceVal">0.00000</span>
-            </div>
-        </div>
-    </div>
-
-    <button class="btn-journal" onclick="saveTradeCard()">
-        📸 <span data-i18n="save_card">SAVE TRADE CARD</span>
-    </button>
-
 </div>
 
 <div class="modal-overlay" id="customModal">
@@ -322,12 +344,12 @@
     };
 
     let ASSETS = {
-        'EURUSD': { type: 'direct', contract: 100000, tick: 0.00001, digits: 5 },
-        'GBPUSD': { type: 'direct', contract: 100000, tick: 0.00001, digits: 5 },
-        'USDJPY': { type: 'inverted', contract: 100000, tick: 0.001, digits: 3 },
-        'XAUUSD': { type: 'gold', contract: 100, tick: 0.01, digits: 2 },
-        'BTCUSD': { type: 'crypto', contract: 1, tick: 0.01, digits: 2 },
-        'CUSTOM': { type: 'direct', contract: 10, tick: 0.01, digits: 2, name: 'CUSTOM' }
+        'EURUSD': { type: 'direct', contract: 100000, tick: 0.00001, digits: 5, tvSymbol: "FX:EURUSD" },
+        'GBPUSD': { type: 'direct', contract: 100000, tick: 0.00001, digits: 5, tvSymbol: "FX:GBPUSD" },
+        'USDJPY': { type: 'inverted', contract: 100000, tick: 0.001, digits: 3, tvSymbol: "FX:USDJPY" },
+        'XAUUSD': { type: 'gold', contract: 100, tick: 0.01, digits: 2, tvSymbol: "OANDA:XAUUSD" },
+        'BTCUSD': { type: 'crypto', contract: 1, tick: 0.01, digits: 2, tvSymbol: "BINANCE:BTCUSD" },
+        'CUSTOM': { type: 'direct', contract: 10, tick: 0.01, digits: 2, name: 'CUSTOM', tvSymbol: "US30" }
     };
     let state = { asset: 'EURUSD', riskMode: 'usd', lang: 'en' };
 
@@ -347,9 +369,35 @@
         });
         setupAutoScroll();
         calc();
+        initTradingView(ASSETS[state.asset].tvSymbol);
     }
 
-    // --- DYNAMIC AUTO SCROLL SYSTEM (Bouncing & 5s Timer) ---
+    // --- TRADINGVIEW INTEGRATION ---
+    function initTradingView(symbol) {
+        if (window.innerWidth < 1024) return; // Ignore on mobile
+        
+        document.getElementById('tv_chart_container').innerHTML = '';
+        
+        new TradingView.widget({
+            "autosize": true,
+            "symbol": symbol,
+            "interval": "15",
+            "timezone": "Etc/UTC",
+            "theme": "dark",
+            "style": "1",
+            "locale": state.lang === 'ru' ? "ru" : "en",
+            "enable_publishing": false,
+            "backgroundColor": "#0d0d0d",
+            "gridColor": "rgba(255, 255, 255, 0.04)",
+            "hide_top_toolbar": false,
+            "hide_legend": false,
+            "save_image": false,
+            "container_id": "tv_chart_container",
+            "toolbar_bg": "#0d0d0d"
+        });
+    }
+
+    // --- DYNAMIC AUTO SCROLL SYSTEM ---
     function setupAutoScroll() {
         const slider = document.getElementById('assetSlider');
         let isDown = false, isPaused = false;
@@ -358,32 +406,21 @@
         let resumeTimeout = null;
         let virtualScroll = 0;
 
-        function pauseInteraction() {
-            isPaused = true;
-            clearTimeout(resumeTimeout);
-        }
-
+        function pauseInteraction() { isPaused = true; clearTimeout(resumeTimeout); }
         function resumeInteraction() {
-            isDown = false;
-            clearTimeout(resumeTimeout);
-            resumeTimeout = setTimeout(() => {
-                isPaused = false;
-                virtualScroll = slider.scrollLeft;
-            }, 5000);
+            isDown = false; clearTimeout(resumeTimeout);
+            resumeTimeout = setTimeout(() => { isPaused = false; virtualScroll = slider.scrollLeft; }, 5000);
         }
 
         slider.addEventListener('mousedown', (e) => {
             isDown = true; pauseInteraction();
-            startX = e.pageX - slider.offsetLeft;
-            scrollLeft = slider.scrollLeft;
+            startX = e.pageX - slider.offsetLeft; scrollLeft = slider.scrollLeft;
         });
         slider.addEventListener('mouseleave', () => { isDown = false; resumeInteraction(); });
         slider.addEventListener('mouseup', () => { isDown = false; resumeInteraction(); });
         slider.addEventListener('mousemove', (e) => {
-            if (!isDown) return;
-            e.preventDefault();
-            const x = e.pageX - slider.offsetLeft;
-            slider.scrollLeft = scrollLeft - (x - startX) * 2;
+            if (!isDown) return; e.preventDefault();
+            const x = e.pageX - slider.offsetLeft; slider.scrollLeft = scrollLeft - (x - startX) * 2;
         });
 
         slider.addEventListener('touchstart', pauseInteraction, {passive: true});
@@ -394,24 +431,13 @@
             if (!isPaused && !isDown) {
                 virtualScroll += 0.25 * scrollDir; 
                 slider.scrollLeft = virtualScroll;
-
-                if (Math.abs(slider.scrollLeft - virtualScroll) > 1.5) {
-                    virtualScroll = slider.scrollLeft;
-                }
-
-                if (slider.scrollLeft >= (slider.scrollWidth - slider.clientWidth - 1)) {
-                    scrollDir = -1; 
-                } else if (slider.scrollLeft <= 0) {
-                    scrollDir = 1;  
-                }
+                if (Math.abs(slider.scrollLeft - virtualScroll) > 1.5) virtualScroll = slider.scrollLeft;
+                if (slider.scrollLeft >= (slider.scrollWidth - slider.clientWidth - 1)) scrollDir = -1; 
+                else if (slider.scrollLeft <= 0) scrollDir = 1;  
             }
             requestAnimationFrame(autoScroll);
         }
-        
-        setTimeout(() => {
-            virtualScroll = slider.scrollLeft;
-            requestAnimationFrame(autoScroll);
-        }, 500);
+        setTimeout(() => { virtualScroll = slider.scrollLeft; requestAnimationFrame(autoScroll); }, 500);
     }
 
     // --- LANGUAGE SYSTEM ---
@@ -425,23 +451,21 @@
             if(dict[lang][key]) el.innerText = dict[lang][key];
         });
         calc(); 
+        // Sync TV widget language
+        initTradingView(ASSETS[state.asset].tvSymbol || state.asset);
     }
     const t = (key) => dict[state.lang][key] || key;
 
     // --- CUSTOM MODAL SYSTEM ---
-    function openCustomModal() {
-        document.getElementById('customModal').classList.add('active');
-    }
-    function closeCustomModal() {
-        document.getElementById('customModal').classList.remove('active');
-    }
+    function openCustomModal() { document.getElementById('customModal').classList.add('active'); }
+    function closeCustomModal() { document.getElementById('customModal').classList.remove('active'); }
     function saveCustomAsset() {
         const name = document.getElementById('custName').value.toUpperCase() || 'CUSTOM';
         const contract = parseFloat(document.getElementById('custContract').value) || 1;
         const tick = parseFloat(document.getElementById('custTick').value) || 0.01;
         const digits = (tick.toString().split('.')[1] || '').length;
 
-        ASSETS['CUSTOM'] = { type: 'direct', contract: contract, tick: tick, digits: digits, name: name };
+        ASSETS['CUSTOM'] = { type: 'direct', contract: contract, tick: tick, digits: digits, name: name, tvSymbol: name };
         
         const customBtn = document.getElementById('customChipBtn');
         customBtn.innerText = "⚙️ " + name;
@@ -456,6 +480,7 @@
         el.classList.add('active');
         state.asset = key;
         calc();
+        initTradingView(ASSETS[key].tvSymbol || ASSETS[key].name);
     }
 
     function toggleRisk(mode) {
@@ -584,38 +609,24 @@
         const canvas = document.createElement('canvas');
         canvas.width = 600; canvas.height = 400; const ctx = canvas.getContext('2d');
 
-        // Background Gradient
         const grd = ctx.createRadialGradient(300, 0, 0, 300, 0, 500);
         grd.addColorStop(0, "#151515");
         grd.addColorStop(1, "#000000");
-        ctx.fillStyle = grd; 
-        ctx.fillRect(0, 0, 600, 400);
+        ctx.fillStyle = grd; ctx.fillRect(0, 0, 600, 400);
         
-        // Card Glow
-        ctx.shadowColor = "rgba(28, 212, 203, 0.15)";
-        ctx.shadowBlur = 40;
-        
-        // Card Body
+        ctx.shadowColor = "rgba(28, 212, 203, 0.15)"; ctx.shadowBlur = 40;
         ctx.fillStyle = "rgba(25, 25, 25, 0.8)";
         if(ctx.roundRect) ctx.roundRect(30, 30, 540, 340, 20); else ctx.fillRect(30, 30, 540, 340);
         ctx.fill();
+        ctx.shadowBlur = 0; 
         
-        ctx.shadowBlur = 0; // Reset
+        ctx.lineWidth = 1; ctx.strokeStyle = "rgba(255, 255, 255, 0.1)"; ctx.stroke();
         
-        // Glass Border
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
-        ctx.stroke();
-        
-        // Header
-        ctx.font = "800 32px 'JetBrains Mono', monospace"; 
-        ctx.fillStyle = "#ffffff";
+        ctx.font = "800 32px 'JetBrains Mono', monospace"; ctx.fillStyle = "#ffffff";
         const assetName = state.asset === 'CUSTOM' ? ASSETS['CUSTOM'].name : state.asset;
         ctx.fillText(assetName, 60, 90);
         
-        // Dynamic Risk Logic
-        ctx.font = "600 18px 'Inter', sans-serif"; 
-        ctx.fillStyle = "#888888";
+        ctx.font = "600 18px 'Inter', sans-serif"; ctx.fillStyle = "#888888";
         let riskText = "";
         const riskVal = parseFloat(document.getElementById('riskInput').value) || 0;
         if (state.riskMode === 'pct') {
@@ -626,19 +637,11 @@
             riskText = `${t('card_risk')} $${riskVal.toFixed(0)}`;
         }
         
-        ctx.textAlign = "right";
-        ctx.fillText(riskText, 540, 85);
-        ctx.textAlign = "left";
+        ctx.textAlign = "right"; ctx.fillText(riskText, 540, 85); ctx.textAlign = "left";
 
-        // Rows
         const drawRow = (label, val, y, color) => {
-            ctx.font = "700 16px 'Inter', sans-serif"; 
-            ctx.fillStyle = "#888888"; 
-            ctx.fillText(label, 60, y);
-            
-            ctx.font = "800 24px 'JetBrains Mono', monospace"; 
-            ctx.fillStyle = color; 
-            ctx.fillText(val, 240, y);
+            ctx.font = "700 16px 'Inter', sans-serif"; ctx.fillStyle = "#888888"; ctx.fillText(label, 60, y);
+            ctx.font = "800 24px 'JetBrains Mono', monospace"; ctx.fillStyle = color; ctx.fillText(val, 240, y);
         }
 
         const digits = ASSETS[state.asset].digits;
@@ -646,16 +649,11 @@
         drawRow(t('card_sl'), stop.toFixed(digits), 230, "#ff5c5c"); 
         drawRow(t('card_lot'), totalLots.toFixed(2), 290, "#1cd4cb"); 
 
-        // Branding
-        ctx.font = "800 14px 'JetBrains Mono', monospace"; 
-        ctx.fillStyle = "rgba(255, 255, 255, 0.2)"; 
+        ctx.font = "800 14px 'JetBrains Mono', monospace"; ctx.fillStyle = "rgba(255, 255, 255, 0.2)"; 
         ctx.fillText("RISK//TERMINAL", 60, 340);
 
-        // Download
-        const link = document.createElement('a');
-        link.download = `Trade_${assetName}_${Date.now()}.png`;
-        link.href = canvas.toDataURL();
-        link.click();
+        const link = document.createElement('a'); link.download = `Trade_${assetName}_${Date.now()}.png`;
+        link.href = canvas.toDataURL(); link.click();
     }
 
     if (CanvasRenderingContext2D.prototype.roundRect === undefined) {
