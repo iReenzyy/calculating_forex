@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Risk Terminal</title>
+    <title>Risk Terminal Global</title>
     
     <link rel="manifest" id="my-manifest">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -15,98 +15,84 @@
     <style>
         :root {
             --bg-color: #050505;
-            --card-bg: rgba(30, 30, 30, 0.7);
-            --input-bg: rgba(50, 50, 50, 0.5);
+            --card-bg: rgba(30, 30, 30, 0.6);
+            --input-bg: rgba(50, 50, 50, 0.4);
             --text-main: #ffffff;
             --text-muted: #888888;
             
-            --accent-cyan: #00f2ea;
-            --danger: #ff3b30;
-            --success: #34c759;
-            --gold: #ffd700;
-            --btc: #f7931a;
+            /* Brighter, but still soft Glassmorphism */
+            --accent-cyan: #1cd4cb; 
+            --danger: #ff5c5c;
+            --success: #3be37f;
+            --gold: #ffda3b;
+            --btc: #ffa333;
 
             --glass-border: 1px solid rgba(255, 255, 255, 0.08);
-            --glow: 0 0 30px rgba(0, 242, 234, 0.1);
+            --glow: 0 0 25px rgba(28, 212, 203, 0.08);
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 20px;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-sizing: border-box;
-            background-image: radial-gradient(circle at 50% 0%, #1a1a1a, #000);
+            background-color: var(--bg-color); color: var(--text-main); font-family: 'Inter', sans-serif;
+            margin: 0; padding: 20px; min-height: 100vh; display: flex; justify-content: center;
+            align-items: center; box-sizing: border-box; background-image: radial-gradient(circle at 50% 0%, #151515, #000);
             -webkit-font-smoothing: antialiased;
         }
 
         /* --- App Container --- */
         .app-container {
-            width: 100%;
-            max-width: 460px;
-            background: rgba(15, 15, 15, 0.6);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 24px;
-            padding: 25px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5), var(--glow);
-            border: var(--glass-border);
-            position: relative;
-            overflow: hidden;
+            width: 100%; max-width: 460px; background: rgba(15, 15, 15, 0.6);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.5), var(--glow);
+            border: var(--glass-border); position: relative; overflow: hidden;
         }
 
         @media (max-width: 500px) {
             body { align-items: flex-start; padding: 10px; }
-            .app-container {
-                box-shadow: none; border: none; background: transparent; padding: 5px;
-            }
+            .app-container { box-shadow: none; border: none; background: transparent; padding: 5px; }
         }
 
-        /* --- Header --- */
-        .header {
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
-        }
+        /* --- Header & Lang Switch --- */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .brand {
             font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 1.1rem;
             letter-spacing: -1px; background: linear-gradient(90deg, #fff, #999);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-        .tick-info {
-            font-size: 0.7rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;
-            background: var(--input-bg); padding: 4px 8px; border-radius: 6px;
+        
+        .lang-switch { display: flex; background: rgba(255,255,255,0.08); border-radius: 6px; padding: 2px; }
+        .lang-opt {
+            font-size: 0.65rem; padding: 4px 8px; border-radius: 4px; color: var(--text-muted);
+            cursor: pointer; font-weight: 800; font-family: 'JetBrains Mono'; transition: 0.2s;
         }
+        .lang-opt.active { background: rgba(28, 212, 203, 0.2); color: var(--accent-cyan); }
 
-        /* --- Asset Chips --- */
-        .asset-scroll {
-            display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; margin-bottom: 20px;
-            scrollbar-width: none;
+        /* --- Asset Chips (Dynamic Auto-scroll) --- */
+        .asset-scroll { 
+            display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; 
+            scrollbar-width: none; cursor: grab;
         }
+        .asset-scroll:active { cursor: grabbing; }
         .asset-scroll::-webkit-scrollbar { display: none; }
+        
         .chip {
             background: var(--card-bg); border: var(--glass-border); color: var(--text-muted);
             padding: 10px 16px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;
-            white-space: nowrap; cursor: pointer; transition: all 0.2s;
+            white-space: nowrap; cursor: pointer; transition: all 0.2s; user-select: none;
         }
-        .chip.active {
-            background: var(--accent-cyan); color: #000; border-color: var(--accent-cyan);
-            box-shadow: 0 0 15px rgba(0, 242, 234, 0.3);
+        
+        /* Glassy Active States (Brighter) */
+        .chip.active { 
+            background: rgba(28, 212, 203, 0.15); color: var(--accent-cyan); 
+            border-color: rgba(28, 212, 203, 0.5); box-shadow: 0 0 15px rgba(28, 212, 203, 0.15); 
         }
-        .chip[data-type="gold"].active { background: var(--gold); box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
-        .chip[data-type="crypto"].active { background: var(--btc); color: #fff; box-shadow: 0 0 15px rgba(247, 147, 26, 0.3); }
+        .chip[data-type="gold"].active { background: rgba(255, 218, 59, 0.15); color: var(--gold); border-color: rgba(255, 218, 59, 0.5); }
+        .chip[data-type="crypto"].active { background: rgba(255, 163, 51, 0.15); color: var(--btc); border-color: rgba(255, 163, 51, 0.5); }
+        .chip[data-type="custom"] { border: 1px dashed rgba(255,255,255,0.25); }
 
         /* --- Inputs --- */
         .grid-row { display: flex; gap: 12px; margin-bottom: 12px; }
         .input-box { flex: 1; position: relative; display: flex; flex-direction: column; }
-        
-        .input-header {
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; height: 20px;
-        }
-        
+        .input-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; height: 20px; }
         label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin: 0; }
 
         input {
@@ -114,72 +100,80 @@
             padding: 12px; border-radius: 10px; font-family: 'JetBrains Mono', monospace;
             font-size: 1rem; box-sizing: border-box; outline: none; transition: 0.2s; flex-grow: 1;
         }
-        input:focus { border-color: var(--accent-cyan); background: rgba(60, 60, 60, 0.8); }
+        input:focus { border-color: rgba(28, 212, 203, 0.6); background: rgba(60, 60, 60, 0.6); }
 
-        .paste-icon {
-            position: absolute; right: 10px; bottom: 12px; opacity: 0.4; cursor: pointer; font-size: 0.9rem;
-        }
+        .paste-icon { position: absolute; right: 10px; bottom: 12px; opacity: 0.3; cursor: pointer; font-size: 0.9rem; transition: 0.2s;}
         .paste-icon:hover { opacity: 1; color: var(--accent-cyan); }
 
-        /* --- Risk Switch --- */
-        .risk-switch {
-            display: flex; background: rgba(255,255,255,0.1); border-radius: 4px; padding: 2px;
-        }
-        .switch-opt {
-            font-size: 0.6rem; padding: 2px 6px; border-radius: 3px; color: var(--text-muted); cursor: pointer; font-weight: 700;
-        }
-        .switch-opt.active { background: #fff; color: #000; }
+        .risk-switch { display: flex; background: rgba(255,255,255,0.08); border-radius: 4px; padding: 2px; }
+        .switch-opt { font-size: 0.6rem; padding: 2px 6px; border-radius: 3px; color: var(--text-muted); cursor: pointer; font-weight: 700; transition: 0.2s;}
+        .switch-opt.active { background: rgba(255,255,255,0.9); color: #000; }
 
-        /* --- Visual & Slider --- */
-        .visual-section {
-            background: var(--card-bg); border: var(--glass-border); padding: 20px;
-            border-radius: 16px; margin: 20px 0;
-        }
-        
-        canvas {
-            width: 100%; height: 90px; background: rgba(0,0,0,0.3); border-radius: 8px;
-            margin: 15px 0 5px 0; border: 1px solid rgba(255,255,255,0.05);
-        }
+        /* --- Visual & Glassy Slider --- */
+        .visual-section { background: var(--card-bg); border: var(--glass-border); padding: 20px; border-radius: 16px; margin: 20px 0; }
+        canvas { width: 100%; height: 90px; background: rgba(0,0,0,0.2); border-radius: 8px; margin: 15px 0 5px 0; border: 1px solid rgba(255,255,255,0.03); }
 
-        /* Slider */
-        input[type=range] {
-            -webkit-appearance: none; width: 100%; background: transparent; margin: 15px 0 5px 0; padding: 0;
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; margin: 15px 0 5px 0; padding: 0; }
+        input[type=range]::-webkit-slider-runnable-track { 
+            width: 100%; height: 6px; border-radius: 4px; border: var(--glass-border);
+            background: linear-gradient(90deg, rgba(28, 212, 203, 0.4) var(--ratio, 60%), rgba(255, 255, 255, 0.08) var(--ratio, 60%)); 
         }
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%; height: 6px; border-radius: 3px;
-            background: linear-gradient(90deg, var(--accent-cyan) var(--ratio, 60%), #333 var(--ratio, 60%));
+        input[type=range]::-webkit-slider-thumb { 
+            -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%; 
+            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.5);
+            cursor: pointer; margin-top: -8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
         }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; height: 22px; width: 22px; border-radius: 50%;
-            background: #fff; cursor: pointer; margin-top: -8px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-        }
-
         .slider-label { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 600; }
 
         /* --- Results --- */
         .results-grid { display: grid; gap: 12px; }
-        .res-card {
-            background: var(--card-bg); border: var(--glass-border); border-radius: 14px;
-            padding: 15px 20px; position: relative; cursor: pointer; transition: transform 0.1s;
-        }
+        .res-card { background: var(--card-bg); border: var(--glass-border); border-radius: 14px; padding: 15px 20px; position: relative; cursor: pointer; transition: transform 0.1s; }
         .res-card:active { transform: scale(0.98); background: rgba(255,255,255,0.05); }
         .res-card.market { border-left: 3px solid var(--accent-cyan); }
         .res-card.limit { border-left: 3px solid var(--success); }
-        
         .res-top { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 5px; }
-        .res-val {
-            font-family: 'JetBrains Mono', monospace; font-size: 2.2rem; font-weight: 700; color: #fff; line-height: 1;
-        }
+        .res-val { font-family: 'JetBrains Mono'; font-size: 2.2rem; font-weight: 700; color: #fff; line-height: 1; }
         .res-card.limit .res-val { color: var(--success); }
-        .res-sub {
-            margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1);
-            font-size: 0.8rem; color: var(--text-muted); display: flex; justify-content: space-between;
+        .res-sub { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 0.8rem; color: var(--text-muted); display: flex; justify-content: space-between; }
+        .copied-tooltip { position: absolute; right: 20px; top: 20px; background: var(--success); color: #000; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+
+        /* --- Compact Journal Button --- */
+        .btn-journal { 
+            background: rgba(255, 255, 255, 0.05); color: var(--text-muted); width: max-content; 
+            padding: 10px 24px; border-radius: 20px; font-weight: 600; font-size: 0.75rem; 
+            border: var(--glass-border); margin: 25px auto 0; cursor: pointer; display: flex; 
+            align-items: center; justify-content: center; gap: 8px; transition: 0.2s; backdrop-filter: blur(5px);
         }
-        .copied-tooltip {
-            position: absolute; right: 20px; top: 20px; background: var(--success); color: #000;
-            padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold;
-            opacity: 0; transition: opacity 0.2s; pointer-events: none;
+        .btn-journal:hover { background: rgba(255, 255, 255, 0.15); color: var(--text-main); }
+        .btn-journal:active { transform: scale(0.95); }
+
+        /* --- Custom Modal --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+            display: flex; justify-content: center; align-items: center; z-index: 100;
+            opacity: 0; pointer-events: none; transition: 0.3s;
         }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal-card {
+            background: var(--card-bg); border: var(--glass-border); border-radius: 20px;
+            padding: 25px; width: 90%; max-width: 320px; box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            transform: translateY(20px); transition: 0.3s; backdrop-filter: blur(15px);
+        }
+        .modal-overlay.active .modal-card { transform: translateY(0); }
+        
+        .modal-title { font-weight: 800; margin-bottom: 20px; color: var(--accent-cyan); font-family: 'JetBrains Mono'; text-transform: uppercase;}
+        
+        .modal-btn { 
+            background: rgba(28, 212, 203, 0.15); color: var(--accent-cyan); 
+            border: 1px solid rgba(28, 212, 203, 0.4); width: 100%; padding: 12px; 
+            border-radius: 10px; font-weight: 800; font-size: 0.85rem; margin-top: 15px; 
+            cursor: pointer; transition: 0.2s; 
+        }
+        .modal-btn:hover { background: rgba(28, 212, 203, 0.3); }
+        
+        .modal-close { position: absolute; right: 20px; top: 20px; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; line-height: 1; transition: 0.2s;}
+        .modal-close:hover { color: #fff; }
 
     </style>
 </head>
@@ -188,22 +182,26 @@
 <div class="app-container">
     
     <div class="header">
-        <div class="brand">RISK//TERMINAL</div>
-        <div class="tick-info" id="tickDebug">Tick: $1.00</div>
+        <div class="brand" data-i18n="app_title">RISK//TERMINAL</div>
+        <div class="lang-switch">
+            <div class="lang-opt active" id="langEN" onclick="setLang('en')">EN</div>
+            <div class="lang-opt" id="langRU" onclick="setLang('ru')">RU</div>
+        </div>
     </div>
 
-    <div class="asset-scroll">
+    <div class="asset-scroll" id="assetSlider">
         <div class="chip active" onclick="setAsset(this, 'EURUSD')">EURUSD</div>
         <div class="chip" onclick="setAsset(this, 'GBPUSD')">GBPUSD</div>
         <div class="chip" onclick="setAsset(this, 'USDJPY')">USDJPY</div>
         <div class="chip" data-type="gold" onclick="setAsset(this, 'XAUUSD')">GOLD</div>
         <div class="chip" data-type="crypto" onclick="setAsset(this, 'BTCUSD')">BTC</div>
+        <div class="chip" data-type="custom" id="customChipBtn" onclick="openCustomModal()">⚙️ CUSTOM</div>
     </div>
 
     <div class="grid-row">
         <div class="input-box">
             <div class="input-header">
-                <label>Risk</label>
+                <label data-i18n="risk_label">Risk</label>
                 <div class="risk-switch">
                     <div class="switch-opt active" id="modeUSD" onclick="toggleRisk('usd')">$</div>
                     <div class="switch-opt" id="modePct" onclick="toggleRisk('pct')">%</div>
@@ -213,24 +211,24 @@
         </div>
         
         <div class="input-box" id="balanceBox" style="display:none">
-            <div class="input-header"><label>Balance</label></div>
+            <div class="input-header"><label data-i18n="balance_label">Balance</label></div>
             <input type="number" id="balanceInput" value="10000" inputmode="decimal">
         </div>
 
         <div class="input-box">
-            <div class="input-header"><label>Comm ($)</label></div>
+            <div class="input-header"><label data-i18n="comm_label">Comm ($)</label></div>
             <input type="number" id="commInput" value="7" inputmode="decimal">
         </div>
     </div>
 
     <div class="grid-row">
         <div class="input-box">
-            <div class="input-header"><label>Entry Price</label></div>
+            <div class="input-header"><label data-i18n="entry_label">Entry Price</label></div>
             <input type="number" id="entryPrice" placeholder="0.00000" step="any" inputmode="decimal">
             <span class="paste-icon" onclick="paste('entryPrice')">📋</span>
         </div>
         <div class="input-box">
-            <div class="input-header"><label>Stop Loss</label></div>
+            <div class="input-header"><label data-i18n="stop_label">Stop Loss</label></div>
             <input type="number" id="stopPrice" placeholder="0.00000" step="any" inputmode="decimal">
             <span class="paste-icon" onclick="paste('stopPrice')">📋</span>
         </div>
@@ -238,73 +236,233 @@
 
     <div class="visual-section">
         <div class="slider-label">
-            <span style="color:var(--accent-cyan)">MARKET <span id="mktPct">60</span>%</span>
-            <span style="color:var(--text-muted)">AGGRESSIVE // CONSERVATIVE</span>
-            <span style="color:var(--success)">LIMIT <span id="lmtPct">40</span>%</span>
+            <span style="color:var(--accent-cyan)"><span data-i18n="lbl_market">MARKET</span> <span id="mktPct">60</span>%</span>
+            <span style="color:var(--success)"><span data-i18n="lbl_limit">LIMIT</span> <span id="lmtPct">40</span>%</span>
         </div>
-
         <input type="range" id="splitSlider" min="0" max="100" value="60" oninput="calc()">
         
         <canvas id="tradeCanvas" width="800" height="200"></canvas>
-        <div style="text-align:center; font-size:0.7rem; color:var(--text-muted);">
+        <div style="text-align:center; font-size:0.7rem; color:var(--text-muted);" data-i18n="limit_hint">
             Limit Price adjusts based on Risk Split
         </div>
     </div>
 
     <div class="results-grid">
         <div class="res-card market" onclick="copyResult('resLot1', this)">
-            <div class="copied-tooltip">COPIED</div>
+            <div class="copied-tooltip" data-i18n="copied">COPIED</div>
             <div class="res-top">
-                <span>1. Market Order</span> <span id="riskDisp1">$0</span>
+                <span data-i18n="mkt_order">1. Market Order</span> <span id="riskDisp1">$0</span>
             </div>
             <div class="res-val" id="resLot1">0.00</div>
         </div>
 
         <div class="res-card limit" onclick="copyResult('resLot2', this)">
-            <div class="copied-tooltip">COPIED</div>
+            <div class="copied-tooltip" data-i18n="copied">COPIED</div>
             <div class="res-top">
-                <span>2. Limit Order</span> <span id="riskDisp2">$0</span>
+                <span data-i18n="lmt_order">2. Limit Order</span> <span id="riskDisp2">$0</span>
             </div>
             <div class="res-val" id="resLot2">0.00</div>
             <div class="res-sub">
-                <span>Limit Price:</span> <span style="color:#fff; font-weight:bold" id="limitPriceVal">0.00000</span>
+                <span data-i18n="limit_price">Limit Price:</span> <span style="color:#fff; font-weight:bold" id="limitPriceVal">0.00000</span>
             </div>
         </div>
     </div>
 
+    <button class="btn-journal" onclick="saveTradeCard()">
+        📸 <span data-i18n="save_card">SAVE TRADE CARD</span>
+    </button>
+
+</div>
+
+<div class="modal-overlay" id="customModal">
+    <div class="modal-card">
+        <div class="modal-close" onclick="closeCustomModal()">&times;</div>
+        <div class="modal-title" data-i18n="custom_title">CUSTOM ASSET SETUP</div>
+        
+        <div style="margin-bottom:12px;">
+            <label data-i18n="custom_name" style="font-size: 0.65rem; display:block; margin-bottom:5px;">Asset Name (e.g. US30)</label>
+            <input type="text" id="custName" value="US30" style="padding:10px;">
+        </div>
+        <div style="margin-bottom:12px;">
+            <label data-i18n="custom_contract" style="font-size: 0.65rem; display:block; margin-bottom:5px;">Contract Size</label>
+            <input type="number" id="custContract" value="10" step="any" inputmode="decimal" style="padding:10px;">
+        </div>
+        <div style="margin-bottom:12px;">
+            <label data-i18n="custom_tick" style="font-size: 0.65rem; display:block; margin-bottom:5px;">Tick Size (e.g. 0.01)</label>
+            <input type="number" id="custTick" value="0.01" step="any" inputmode="decimal" style="padding:10px;">
+        </div>
+        
+        <button class="modal-btn" onclick="saveCustomAsset()" data-i18n="btn_save">SAVE & APPLY</button>
+    </div>
 </div>
 
 <script>
-    // --- 1. PWA GENERATOR ---
+    // --- DICTIONARY (i18n) ---
+    const dict = {
+        en: {
+            app_title: "RISK//TERMINAL", risk_label: "Risk", balance_label: "Balance", comm_label: "Comm ($)",
+            entry_label: "Entry Price", stop_label: "Stop Loss", lbl_market: "MARKET", lbl_limit: "LIMIT",
+            limit_hint: "Limit Price adjusts based on Risk Split", mkt_order: "1. Market Order", lmt_order: "2. Limit Order",
+            limit_price: "Limit Price:", save_card: "SAVE CARD", copied: "COPIED",
+            waiting: "ENTER PRICES", canvas_sl: "SL", canvas_mkt: "ENTRY", canvas_lmt: "LIMIT",
+            custom_title: "CUSTOM ASSET SETUP", custom_name: "Asset Name (e.g. US30)", custom_contract: "Contract Size",
+            custom_tick: "Tick Size (e.g. 0.01)", btn_save: "SAVE & APPLY", card_risk: "Risk:", card_avg: "AVG ENTRY",
+            card_sl: "STOP LOSS", card_lot: "TOTAL LOT"
+        },
+        ru: {
+            app_title: "RISK//ТЕРМИНАЛ", risk_label: "Риск", balance_label: "Баланс", comm_label: "Комиссия ($)",
+            entry_label: "Цена Входа", stop_label: "Стоп Лосс", lbl_market: "РЫНОК", lbl_limit: "ЛИМИТ",
+            limit_hint: "Лимитка двигается от ползунка риска", mkt_order: "1. По Рынку", lmt_order: "2. Лимитка",
+            limit_price: "Цена Лимита:", save_card: "СОХРАНИТЬ КАРТОЧКУ", copied: "СКОПИРОВАНО",
+            waiting: "ВВЕДИТЕ ЦЕНЫ", canvas_sl: "СТОП", canvas_mkt: "ВХОД", canvas_lmt: "ЛИМИТ",
+            custom_title: "НАСТРОЙКА АКТИВА", custom_name: "Название (напр. US30)", custom_contract: "Размер контракта",
+            custom_tick: "Размер тика (напр. 0.01)", btn_save: "СОХРАНИТЬ", card_risk: "Риск:", card_avg: "СРЕДНИЙ ВХОД",
+            card_sl: "СТОП ЛОСС", card_lot: "ОБЩИЙ ЛОТ"
+        }
+    };
+
+    let ASSETS = {
+        'EURUSD': { type: 'direct', contract: 100000, tick: 0.00001, digits: 5 },
+        'GBPUSD': { type: 'direct', contract: 100000, tick: 0.00001, digits: 5 },
+        'USDJPY': { type: 'inverted', contract: 100000, tick: 0.001, digits: 3 },
+        'XAUUSD': { type: 'gold', contract: 100, tick: 0.01, digits: 2 },
+        'BTCUSD': { type: 'crypto', contract: 1, tick: 0.01, digits: 2 },
+        'CUSTOM': { type: 'direct', contract: 10, tick: 0.01, digits: 2, name: 'CUSTOM' }
+    };
+    let state = { asset: 'EURUSD', riskMode: 'usd', lang: 'en' };
+
+    // --- PWA GENERATOR ---
     const manifest = {
-        name: "Risk Terminal",
-        short_name: "RiskCalc",
-        start_url: ".",
-        display: "standalone",
-        background_color: "#050505",
-        theme_color: "#050505",
+        name: "Risk Terminal", short_name: "RiskCalc", start_url: ".", display: "standalone",
+        background_color: "#050505", theme_color: "#050505",
         icons: [{ src: "https://img.icons8.com/color/180/000000/bullish.png", sizes: "192x192", type: "image/png" }]
     };
     const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
     document.getElementById('my-manifest').setAttribute('href', URL.createObjectURL(blob));
 
-    // --- 2. LOGIC CORE ---
-    const ASSETS = {
-        'EURUSD': { type: 'direct', contract: 100000, tick: 0.00001, digits: 5 },
-        'GBPUSD': { type: 'direct', contract: 100000, tick: 0.00001, digits: 5 },
-        'USDJPY': { type: 'inverted', contract: 100000, tick: 0.001, digits: 3 },
-        'XAUUSD': { type: 'gold', contract: 100, tick: 0.01, digits: 2 },
-        'BTCUSD': { type: 'crypto', contract: 1, tick: 0.01, digits: 2 }
-    };
-    let state = { asset: 'EURUSD', riskMode: 'usd' };
-
+    // --- INIT ---
     function init() {
         ['riskInput','balanceInput','commInput','entryPrice','stopPrice'].forEach(id => {
             document.getElementById(id).addEventListener('input', calc);
         });
+        setupAutoScroll();
         calc();
     }
 
+    // --- DYNAMIC AUTO SCROLL SYSTEM (Bouncing & 5s Timer) ---
+    function setupAutoScroll() {
+        const slider = document.getElementById('assetSlider');
+        let isDown = false, isPaused = false;
+        let startX, scrollLeft;
+        let scrollDir = 1;
+        let resumeTimeout = null;
+        let virtualScroll = 0; // Virtual counter for sub-pixel smooth scrolling
+
+        function pauseInteraction() {
+            isPaused = true;
+            clearTimeout(resumeTimeout);
+        }
+
+        function resumeInteraction() {
+            isDown = false;
+            clearTimeout(resumeTimeout);
+            resumeTimeout = setTimeout(() => {
+                isPaused = false;
+                virtualScroll = slider.scrollLeft; // Sync virtual position before resuming
+            }, 5000);
+        }
+
+        // Mouse Drag events
+        slider.addEventListener('mousedown', (e) => {
+            isDown = true; pauseInteraction();
+            startX = e.pageX - slider.offsetLeft;
+            scrollLeft = slider.scrollLeft;
+        });
+        slider.addEventListener('mouseleave', () => { 
+            isDown = false; resumeInteraction(); 
+        });
+        slider.addEventListener('mouseup', () => {
+            isDown = false; resumeInteraction();
+        });
+        slider.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - slider.offsetLeft;
+            slider.scrollLeft = scrollLeft - (x - startX) * 2;
+        });
+
+        // Touch events
+        slider.addEventListener('touchstart', pauseInteraction, {passive: true});
+        slider.addEventListener('touchend', resumeInteraction);
+        
+        // Hover events
+        slider.addEventListener('mouseenter', pauseInteraction);
+
+        // Frame loop
+        function autoScroll() {
+            if (!isPaused && !isDown) {
+                virtualScroll += 0.25 * scrollDir; // Slower, smooth speed
+                slider.scrollLeft = virtualScroll;
+
+                // Browsers may truncate fractional scrollLeft. Sync if drift is large.
+                if (Math.abs(slider.scrollLeft - virtualScroll) > 1.5) {
+                    virtualScroll = slider.scrollLeft;
+                }
+
+                // Bounce logic (using safe padding for mobile screens)
+                if (slider.scrollLeft >= (slider.scrollWidth - slider.clientWidth - 1)) {
+                    scrollDir = -1; // Reverse left
+                } else if (slider.scrollLeft <= 0) {
+                    scrollDir = 1;  // Reverse right
+                }
+            }
+            requestAnimationFrame(autoScroll);
+        }
+        
+        // Start loop slightly delayed to let DOM render sizes properly
+        setTimeout(() => {
+            virtualScroll = slider.scrollLeft;
+            requestAnimationFrame(autoScroll);
+        }, 500);
+    }
+
+    // --- LANGUAGE SYSTEM ---
+    function setLang(lang) {
+        state.lang = lang;
+        document.getElementById('langEN').classList.toggle('active', lang === 'en');
+        document.getElementById('langRU').classList.toggle('active', lang === 'ru');
+        
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if(dict[lang][key]) el.innerText = dict[lang][key];
+        });
+        calc(); 
+    }
+    const t = (key) => dict[state.lang][key] || key;
+
+    // --- CUSTOM MODAL SYSTEM ---
+    function openCustomModal() {
+        document.getElementById('customModal').classList.add('active');
+    }
+    function closeCustomModal() {
+        document.getElementById('customModal').classList.remove('active');
+    }
+    function saveCustomAsset() {
+        const name = document.getElementById('custName').value.toUpperCase() || 'CUSTOM';
+        const contract = parseFloat(document.getElementById('custContract').value) || 1;
+        const tick = parseFloat(document.getElementById('custTick').value) || 0.01;
+        const digits = (tick.toString().split('.')[1] || '').length;
+
+        ASSETS['CUSTOM'] = { type: 'direct', contract: contract, tick: tick, digits: digits, name: name };
+        
+        const customBtn = document.getElementById('customChipBtn');
+        customBtn.innerText = "⚙️ " + name;
+        
+        closeCustomModal();
+        setAsset(customBtn, 'CUSTOM');
+    }
+
+    // --- LOGIC ---
     function setAsset(el, key) {
         document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
         el.classList.add('active');
@@ -316,8 +474,7 @@
         state.riskMode = mode;
         document.getElementById('modeUSD').classList.toggle('active', mode === 'usd');
         document.getElementById('modePct').classList.toggle('active', mode === 'pct');
-        const balBox = document.getElementById('balanceBox');
-        balBox.style.display = mode === 'pct' ? 'flex' : 'none';
+        document.getElementById('balanceBox').style.display = mode === 'pct' ? 'flex' : 'none';
         calc();
     }
 
@@ -330,22 +487,14 @@
     }
 
     function calc() {
-        // Read Inputs
         let riskVal = parseFloat(document.getElementById('riskInput').value) || 0;
         const comm = parseFloat(document.getElementById('commInput').value) || 0;
         const entry = parseFloat(document.getElementById('entryPrice').value) || 0;
         const stop = parseFloat(document.getElementById('stopPrice').value) || 0;
         
-        // Slider Logic
         const split = parseInt(document.getElementById('splitSlider').value);
-        
-        // --- THE MAGIC LOGIC ---
-        // Retracement Depth is inverse to Market Aggression.
-        // If Split is 100 (All Market), Retracement is 0 (At Entry).
-        // If Split is 0 (All Limit), Retracement is 100 (At Stop).
         const retreat = 100 - split; 
 
-        // Visual Updates
         document.getElementById('splitSlider').style.setProperty('--ratio', split + '%');
         document.getElementById('mktPct').innerText = split;
         document.getElementById('lmtPct').innerText = 100 - split;
@@ -358,13 +507,9 @@
         }
 
         if(entry && stop && entry !== stop) {
-            const tickVal = getTickValue(state.asset, entry);
-            document.getElementById('tickDebug').innerText = `Tick: $${tickVal.toFixed(2)}`;
-
-            // Limit Price Math based on Split
             const limitPrice = entry + (stop - entry) * (retreat / 100);
+            const tickVal = getTickValue(state.asset, entry);
             
-            // Lots
             const dist = Math.abs(entry - stop);
             const lossPerLot = ((dist / data.tick) * tickVal) + comm;
             
@@ -377,7 +522,6 @@
             const l1 = lossPerLot > 0 ? r1 / lossPerLot : 0;
             const l2 = lossPerLotLimit > 0 ? r2 / lossPerLotLimit : 0;
 
-            // Display
             document.getElementById('resLot1').innerText = l1.toFixed(2);
             document.getElementById('resLot2').innerText = l2.toFixed(2);
             document.getElementById('riskDisp1').innerText = `~$${r1.toFixed(0)}`;
@@ -394,31 +538,23 @@
     function drawVisuals(entry, stop, limit, isEmpty = false) {
         const c = document.getElementById('tradeCanvas');
         const ctx = c.getContext('2d');
-        const w = c.width;
-        const h = c.height;
+        const w = c.width; const h = c.height;
 
         ctx.clearRect(0, 0, w, h);
 
         if(isEmpty) {
-            ctx.fillStyle = "#333";
-            ctx.font = "30px Inter";
-            ctx.textAlign = "center";
-            ctx.fillText("ENTER PRICES", w/2, h/2 + 10);
-            return;
+            ctx.fillStyle = "#444"; ctx.font = "30px Inter"; ctx.textAlign = "center";
+            ctx.fillText(t('waiting'), w/2, h/2 + 10); return;
         }
 
         const maxP = Math.max(entry, stop);
         const minP = Math.min(entry, stop);
         const range = maxP - minP;
-        const padding = range * 0.3; // More padding for labels
+        const padding = range * 0.3; 
 
-        const mapY = (p) => {
-            return ((maxP + padding - p) / (range + padding * 2)) * h;
-        };
+        const mapY = (p) => ((maxP + padding - p) / (range + padding * 2)) * h;
 
-        const yEntry = mapY(entry);
-        const yStop = mapY(stop);
-        const yLimit = mapY(limit);
+        const yEntry = mapY(entry); const yStop = mapY(stop); const yLimit = mapY(limit);
 
         const line = (y, color, width, dash = []) => {
             ctx.beginPath(); ctx.lineWidth = width; ctx.strokeStyle = color; ctx.setLineDash(dash);
@@ -428,47 +564,92 @@
             ctx.beginPath(); ctx.arc(w - 20, y, 6, 0, 2 * Math.PI); ctx.fillStyle = color; ctx.fill();
         };
 
-        // Draw STOP
-        line(yStop, '#ff3b30', 4);
-        circle(yStop, '#ff3b30');
-        ctx.fillStyle = '#ff3b30'; ctx.font = "bold 24px Inter"; ctx.textAlign = "left";
-        ctx.fillText("SL", 25, yStop - 10);
-
-        // Draw ENTRY
-        line(yEntry, '#00f2ea', 4);
-        circle(yEntry, '#00f2ea');
-        ctx.fillStyle = '#00f2ea'; ctx.fillText("ENTRY", 25, yEntry - 10);
-
-        // Draw LIMIT (Moving)
-        line(yLimit, '#34c759', 3, [10, 10]);
-        circle(yLimit, '#34c759');
-        ctx.fillStyle = '#34c759'; ctx.fillText("LIMIT", 25, yLimit - 10);
-        
-        // Zone Fill
-        ctx.globalAlpha = 0.1; ctx.fillStyle = '#ff3b30';
+        // Zone Fill (Brightened Soft colors)
+        ctx.globalAlpha = 0.15; ctx.fillStyle = '#ff5c5c';
         ctx.fillRect(20, Math.min(yStop, yEntry), w-40, Math.abs(yStop - yEntry));
         ctx.globalAlpha = 1.0;
+
+        // Lines & Translated Text using new brighter palette
+        line(yStop, '#ff5c5c', 4); circle(yStop, '#ff5c5c');
+        ctx.fillStyle = '#ff5c5c'; ctx.font = "bold 24px Inter"; ctx.textAlign = "left";
+        ctx.fillText(t('canvas_sl'), 25, yStop - 10);
+
+        line(yEntry, '#1cd4cb', 4); circle(yEntry, '#1cd4cb');
+        ctx.fillStyle = '#1cd4cb'; ctx.fillText(t('canvas_mkt'), 25, yEntry - 10);
+
+        line(yLimit, '#3be37f', 3, [10, 10]); circle(yLimit, '#3be37f');
+        ctx.fillStyle = '#3be37f'; ctx.fillText(t('canvas_lmt'), 25, yLimit - 10);
+    }
+
+    // --- JOURNAL CARD ---
+    function saveTradeCard() {
+        const entry = parseFloat(document.getElementById('entryPrice').value);
+        const stop = parseFloat(document.getElementById('stopPrice').value);
+        const limit = parseFloat(document.getElementById('limitPriceVal').innerText);
+        const l1 = parseFloat(document.getElementById('resLot1').innerText);
+        const l2 = parseFloat(document.getElementById('resLot2').innerText);
+        
+        if(!entry || !stop) return;
+
+        const totalLots = l1 + l2;
+        let avgPrice = entry;
+        if(totalLots > 0) avgPrice = ((entry * l1) + (limit * l2)) / totalLots;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 600; canvas.height = 400; const ctx = canvas.getContext('2d');
+
+        ctx.fillStyle = "#050505"; ctx.fillRect(0, 0, 600, 400);
+        ctx.fillStyle = "#1a1a1a";
+        if(ctx.roundRect) ctx.roundRect(20, 20, 560, 360, 20); else ctx.fillRect(20, 20, 560, 360);
+        ctx.fill();
+        
+        ctx.font = "bold 30px Inter"; ctx.fillStyle = "#ffffff";
+        const assetName = state.asset === 'CUSTOM' ? ASSETS['CUSTOM'].name : state.asset;
+        ctx.fillText(assetName, 50, 80);
+        
+        ctx.font = "20px Inter"; ctx.fillStyle = "#888";
+        ctx.fillText(`${t('card_risk')} ${document.getElementById('riskInput').value}$`, 450, 80);
+
+        const drawRow = (label, val, y, color) => {
+            ctx.font = "bold 18px Inter"; ctx.fillStyle = "#888"; ctx.fillText(label, 50, y);
+            ctx.font = "bold 24px JetBrains Mono"; ctx.fillStyle = color; ctx.fillText(val, 250, y);
+        }
+
+        const digits = ASSETS[state.asset].digits;
+        drawRow(t('card_avg'), avgPrice.toFixed(digits), 160, "#ffda3b"); // Yellow
+        drawRow(t('card_sl'), stop.toFixed(digits), 210, "#ff5c5c"); // Red
+        drawRow(t('card_lot'), totalLots.toFixed(2), 260, "#1cd4cb"); // Cyan
+
+        ctx.font = "14px Inter"; ctx.fillStyle = "#444"; ctx.fillText("RISK // TERMINAL", 50, 360);
+
+        const link = document.createElement('a');
+        link.download = `Trade_${assetName}_${Date.now()}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+    }
+
+    if (CanvasRenderingContext2D.prototype.roundRect === undefined) {
+        CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+            if (w < 2 * r) r = w / 2; if (h < 2 * r) r = h / 2;
+            this.beginPath(); this.moveTo(x + r, y); this.arcTo(x + w, y, x + w, y + h, r);
+            this.arcTo(x + w, y + h, x, y + h, r); this.arcTo(x, y + h, x, y, r); this.arcTo(x, y, x + w, y, r);
+            this.closePath(); return this;
+        };
     }
 
     async function paste(id) {
         try {
             const text = await navigator.clipboard.readText();
             const num = parseFloat(text.replace(',','.').replace(/[^0-9.]/g,''));
-            if(!isNaN(num)) {
-                document.getElementById(id).value = num;
-                if(navigator.vibrate) navigator.vibrate(20);
-                calc();
-            }
+            if(!isNaN(num)) { document.getElementById(id).value = num; if(navigator.vibrate) navigator.vibrate(20); calc(); }
         } catch(e) {}
     }
 
     function copyResult(id, cardEl) {
-        const txt = document.getElementById(id).innerText;
-        navigator.clipboard.writeText(txt);
+        navigator.clipboard.writeText(document.getElementById(id).innerText);
         if(navigator.vibrate) navigator.vibrate(40);
         const tip = cardEl.querySelector('.copied-tooltip');
-        tip.style.opacity = '1';
-        setTimeout(() => tip.style.opacity = '0', 1000);
+        tip.style.opacity = '1'; setTimeout(() => tip.style.opacity = '0', 1000);
     }
 
     init();
