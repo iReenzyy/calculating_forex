@@ -356,7 +356,7 @@
         let startX, scrollLeft;
         let scrollDir = 1;
         let resumeTimeout = null;
-        let virtualScroll = 0; // Virtual counter for sub-pixel smooth scrolling
+        let virtualScroll = 0;
 
         function pauseInteraction() {
             isPaused = true;
@@ -368,22 +368,17 @@
             clearTimeout(resumeTimeout);
             resumeTimeout = setTimeout(() => {
                 isPaused = false;
-                virtualScroll = slider.scrollLeft; // Sync virtual position before resuming
+                virtualScroll = slider.scrollLeft;
             }, 5000);
         }
 
-        // Mouse Drag events
         slider.addEventListener('mousedown', (e) => {
             isDown = true; pauseInteraction();
             startX = e.pageX - slider.offsetLeft;
             scrollLeft = slider.scrollLeft;
         });
-        slider.addEventListener('mouseleave', () => { 
-            isDown = false; resumeInteraction(); 
-        });
-        slider.addEventListener('mouseup', () => {
-            isDown = false; resumeInteraction();
-        });
+        slider.addEventListener('mouseleave', () => { isDown = false; resumeInteraction(); });
+        slider.addEventListener('mouseup', () => { isDown = false; resumeInteraction(); });
         slider.addEventListener('mousemove', (e) => {
             if (!isDown) return;
             e.preventDefault();
@@ -391,35 +386,28 @@
             slider.scrollLeft = scrollLeft - (x - startX) * 2;
         });
 
-        // Touch events
         slider.addEventListener('touchstart', pauseInteraction, {passive: true});
         slider.addEventListener('touchend', resumeInteraction);
-        
-        // Hover events
         slider.addEventListener('mouseenter', pauseInteraction);
 
-        // Frame loop
         function autoScroll() {
             if (!isPaused && !isDown) {
-                virtualScroll += 0.25 * scrollDir; // Slower, smooth speed
+                virtualScroll += 0.25 * scrollDir; 
                 slider.scrollLeft = virtualScroll;
 
-                // Browsers may truncate fractional scrollLeft. Sync if drift is large.
                 if (Math.abs(slider.scrollLeft - virtualScroll) > 1.5) {
                     virtualScroll = slider.scrollLeft;
                 }
 
-                // Bounce logic (using safe padding for mobile screens)
                 if (slider.scrollLeft >= (slider.scrollWidth - slider.clientWidth - 1)) {
-                    scrollDir = -1; // Reverse left
+                    scrollDir = -1; 
                 } else if (slider.scrollLeft <= 0) {
-                    scrollDir = 1;  // Reverse right
+                    scrollDir = 1;  
                 }
             }
             requestAnimationFrame(autoScroll);
         }
         
-        // Start loop slightly delayed to let DOM render sizes properly
         setTimeout(() => {
             virtualScroll = slider.scrollLeft;
             requestAnimationFrame(autoScroll);
@@ -564,12 +552,10 @@
             ctx.beginPath(); ctx.arc(w - 20, y, 6, 0, 2 * Math.PI); ctx.fillStyle = color; ctx.fill();
         };
 
-        // Zone Fill (Brightened Soft colors)
         ctx.globalAlpha = 0.15; ctx.fillStyle = '#ff5c5c';
         ctx.fillRect(20, Math.min(yStop, yEntry), w-40, Math.abs(yStop - yEntry));
         ctx.globalAlpha = 1.0;
 
-        // Lines & Translated Text using new brighter palette
         line(yStop, '#ff5c5c', 4); circle(yStop, '#ff5c5c');
         ctx.fillStyle = '#ff5c5c'; ctx.font = "bold 24px Inter"; ctx.textAlign = "left";
         ctx.fillText(t('canvas_sl'), 25, yStop - 10);
@@ -581,7 +567,7 @@
         ctx.fillStyle = '#3be37f'; ctx.fillText(t('canvas_lmt'), 25, yLimit - 10);
     }
 
-    // --- JOURNAL CARD ---
+    // --- ENHANCED JOURNAL CARD ---
     function saveTradeCard() {
         const entry = parseFloat(document.getElementById('entryPrice').value);
         const stop = parseFloat(document.getElementById('stopPrice').value);
@@ -598,30 +584,74 @@
         const canvas = document.createElement('canvas');
         canvas.width = 600; canvas.height = 400; const ctx = canvas.getContext('2d');
 
-        ctx.fillStyle = "#050505"; ctx.fillRect(0, 0, 600, 400);
-        ctx.fillStyle = "#1a1a1a";
-        if(ctx.roundRect) ctx.roundRect(20, 20, 560, 360, 20); else ctx.fillRect(20, 20, 560, 360);
+        // Background Gradient
+        const grd = ctx.createRadialGradient(300, 0, 0, 300, 0, 500);
+        grd.addColorStop(0, "#151515");
+        grd.addColorStop(1, "#000000");
+        ctx.fillStyle = grd; 
+        ctx.fillRect(0, 0, 600, 400);
+        
+        // Card Glow
+        ctx.shadowColor = "rgba(28, 212, 203, 0.15)";
+        ctx.shadowBlur = 40;
+        
+        // Card Body
+        ctx.fillStyle = "rgba(25, 25, 25, 0.8)";
+        if(ctx.roundRect) ctx.roundRect(30, 30, 540, 340, 20); else ctx.fillRect(30, 30, 540, 340);
         ctx.fill();
         
-        ctx.font = "bold 30px Inter"; ctx.fillStyle = "#ffffff";
-        const assetName = state.asset === 'CUSTOM' ? ASSETS['CUSTOM'].name : state.asset;
-        ctx.fillText(assetName, 50, 80);
+        ctx.shadowBlur = 0; // Reset
         
-        ctx.font = "20px Inter"; ctx.fillStyle = "#888";
-        ctx.fillText(`${t('card_risk')} ${document.getElementById('riskInput').value}$`, 450, 80);
+        // Glass Border
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+        ctx.stroke();
+        
+        // Header
+        ctx.font = "800 32px 'JetBrains Mono', monospace"; 
+        ctx.fillStyle = "#ffffff";
+        const assetName = state.asset === 'CUSTOM' ? ASSETS['CUSTOM'].name : state.asset;
+        ctx.fillText(assetName, 60, 90);
+        
+        // Dynamic Risk Logic
+        ctx.font = "600 18px 'Inter', sans-serif"; 
+        ctx.fillStyle = "#888888";
+        let riskText = "";
+        const riskVal = parseFloat(document.getElementById('riskInput').value) || 0;
+        if (state.riskMode === 'pct') {
+            const bal = parseFloat(document.getElementById('balanceInput').value) || 0;
+            const riskUsd = bal * (riskVal / 100);
+            riskText = `${t('card_risk')} $${riskUsd.toFixed(0)} (${riskVal}%)`;
+        } else {
+            riskText = `${t('card_risk')} $${riskVal.toFixed(0)}`;
+        }
+        
+        ctx.textAlign = "right";
+        ctx.fillText(riskText, 540, 85);
+        ctx.textAlign = "left";
 
+        // Rows
         const drawRow = (label, val, y, color) => {
-            ctx.font = "bold 18px Inter"; ctx.fillStyle = "#888"; ctx.fillText(label, 50, y);
-            ctx.font = "bold 24px JetBrains Mono"; ctx.fillStyle = color; ctx.fillText(val, 250, y);
+            ctx.font = "700 16px 'Inter', sans-serif"; 
+            ctx.fillStyle = "#888888"; 
+            ctx.fillText(label, 60, y);
+            
+            ctx.font = "800 24px 'JetBrains Mono', monospace"; 
+            ctx.fillStyle = color; 
+            ctx.fillText(val, 240, y);
         }
 
         const digits = ASSETS[state.asset].digits;
-        drawRow(t('card_avg'), avgPrice.toFixed(digits), 160, "#ffda3b"); // Yellow
-        drawRow(t('card_sl'), stop.toFixed(digits), 210, "#ff5c5c"); // Red
-        drawRow(t('card_lot'), totalLots.toFixed(2), 260, "#1cd4cb"); // Cyan
+        drawRow(t('card_avg'), avgPrice.toFixed(digits), 170, "#ffda3b"); 
+        drawRow(t('card_sl'), stop.toFixed(digits), 230, "#ff5c5c"); 
+        drawRow(t('card_lot'), totalLots.toFixed(2), 290, "#1cd4cb"); 
 
-        ctx.font = "14px Inter"; ctx.fillStyle = "#444"; ctx.fillText("RISK // TERMINAL", 50, 360);
+        // Branding
+        ctx.font = "800 14px 'JetBrains Mono', monospace"; 
+        ctx.fillStyle = "rgba(255, 255, 255, 0.2)"; 
+        ctx.fillText("RISK//TERMINAL", 60, 340);
 
+        // Download
         const link = document.createElement('a');
         link.download = `Trade_${assetName}_${Date.now()}.png`;
         link.href = canvas.toDataURL();
