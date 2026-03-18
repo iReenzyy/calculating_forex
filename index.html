@@ -30,6 +30,9 @@
 
             --glass-border: 1px solid rgba(255, 255, 255, 0.08);
             --glow: 0 0 25px rgba(28, 212, 203, 0.08);
+            
+            /* Tilt Guard Vars */
+            --tilt-glow: 0;
         }
 
         body {
@@ -51,7 +54,25 @@
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border-radius: 24px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.5), var(--glow);
             border: var(--glass-border); position: relative; overflow: hidden;
-            display: flex; flex-direction: column;
+            display: flex; flex-direction: column; transition: background 0.3s;
+        }
+
+        /* Tilt Heartbeat Animation */
+        @keyframes heartbeat {
+            0% { box-shadow: inset 0 0 10px rgba(255,92,92, calc(var(--tilt-glow)*0.2)), 0 20px 50px rgba(0,0,0,0.5); border-color: rgba(255, 255, 255, 0.08); }
+            15% { box-shadow: inset 0 0 80px rgba(255,92,92, var(--tilt-glow)), 0 20px 50px rgba(0,0,0,0.5), 0 0 60px rgba(255,92,92, var(--tilt-glow)); border-color: rgba(255, 92, 92, var(--tilt-glow)); }
+            30% { box-shadow: inset 0 0 10px rgba(255,92,92, calc(var(--tilt-glow)*0.2)), 0 20px 50px rgba(0,0,0,0.5); border-color: rgba(255, 255, 255, 0.08); }
+            45% { box-shadow: inset 0 0 80px rgba(255,92,92, var(--tilt-glow)), 0 20px 50px rgba(0,0,0,0.5), 0 0 60px rgba(255,92,92, var(--tilt-glow)); border-color: rgba(255, 92, 92, var(--tilt-glow)); }
+            100% { box-shadow: inset 0 0 10px rgba(255,92,92, calc(var(--tilt-glow)*0.2)), 0 20px 50px rgba(0,0,0,0.5); border-color: rgba(255, 255, 255, 0.08); }
+        }
+
+        /* Ghost Warning Text */
+        .tilt-text {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1);
+            font-family: 'JetBrains Mono', monospace; font-size: 2.2rem; font-weight: 800;
+            color: rgba(255, 255, 255, 0.9); text-shadow: 0 0 40px #ff5c5c, 0 0 20px #ff5c5c;
+            text-align: center; pointer-events: none; z-index: 50;
+            opacity: 0; white-space: nowrap; width: 100%;
         }
 
         /* --- TradingView Chart Container (Desktop Only) --- */
@@ -63,7 +84,7 @@
         }
 
         @media (min-width: 1024px) {
-            .chart-container { display: block; } /* Show only on PC/Tablets */
+            .chart-container { display: block; }
         }
 
         @media (max-width: 500px) {
@@ -80,7 +101,7 @@
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
         
-        .lang-switch { display: flex; background: rgba(255,255,255,0.08); border-radius: 6px; padding: 2px; }
+        .lang-switch { display: flex; background: rgba(255,255,255,0.08); border-radius: 6px; padding: 2px; z-index: 10; }
         .lang-opt {
             font-size: 0.65rem; padding: 4px 8px; border-radius: 4px; color: var(--text-muted);
             cursor: pointer; font-weight: 800; font-family: 'JetBrains Mono'; transition: 0.2s;
@@ -90,7 +111,7 @@
         /* --- Asset Chips --- */
         .asset-scroll { 
             display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; 
-            scrollbar-width: none; cursor: grab; flex-shrink: 0;
+            scrollbar-width: none; cursor: grab; flex-shrink: 0; z-index: 10;
         }
         .asset-scroll:active { cursor: grabbing; }
         .asset-scroll::-webkit-scrollbar { display: none; }
@@ -110,7 +131,7 @@
         .chip[data-type="custom"] { border: 1px dashed rgba(255,255,255,0.25); }
 
         /* --- Inputs --- */
-        .grid-row { display: flex; gap: 12px; margin-bottom: 12px; flex-shrink: 0;}
+        .grid-row { display: flex; gap: 12px; margin-bottom: 12px; flex-shrink: 0; z-index: 10;}
         .input-box { flex: 1; position: relative; display: flex; flex-direction: column; }
         .input-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; height: 20px; }
         label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin: 0; }
@@ -130,7 +151,7 @@
         .switch-opt.active { background: rgba(255,255,255,0.9); color: #000; }
 
         /* --- Visual & Slider --- */
-        .visual-section { background: var(--card-bg); border: var(--glass-border); padding: 20px; border-radius: 16px; margin: 20px 0; flex-shrink: 0;}
+        .visual-section { background: var(--card-bg); border: var(--glass-border); padding: 20px; border-radius: 16px; margin: 20px 0; flex-shrink: 0; z-index: 10;}
         canvas { width: 100%; height: 90px; background: rgba(0,0,0,0.2); border-radius: 8px; margin: 15px 0 5px 0; border: 1px solid rgba(255,255,255,0.03); }
 
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; margin: 15px 0 5px 0; padding: 0; }
@@ -146,7 +167,7 @@
         .slider-label { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 600; }
 
         /* --- Results --- */
-        .results-grid { display: grid; gap: 12px; flex-shrink: 0;}
+        .results-grid { display: grid; gap: 12px; flex-shrink: 0; z-index: 10;}
         .res-card { background: var(--card-bg); border: var(--glass-border); border-radius: 14px; padding: 15px 20px; position: relative; cursor: pointer; transition: transform 0.1s; }
         .res-card:active { transform: scale(0.98); background: rgba(255,255,255,0.05); }
         .res-card.market { border-left: 3px solid var(--accent-cyan); }
@@ -163,7 +184,7 @@
             padding: 10px 24px; border-radius: 20px; font-weight: 600; font-size: 0.75rem; 
             border: var(--glass-border); margin: 25px auto 0; cursor: pointer; display: flex; 
             align-items: center; justify-content: center; gap: 8px; transition: 0.2s; backdrop-filter: blur(5px);
-            flex-shrink: 0;
+            flex-shrink: 0; z-index: 10;
         }
         .btn-journal:hover { background: rgba(255, 255, 255, 0.15); color: var(--text-main); }
         .btn-journal:active { transform: scale(0.95); }
@@ -198,8 +219,10 @@
 <body>
 
 <div class="main-wrapper">
-    <div class="app-container">
+    <div class="app-container" id="appBox">
         
+        <div id="tiltWarningText" class="tilt-text" data-i18n="tilt_warn">HIGH RISK WARNING</div>
+
         <div class="header">
             <div class="brand" data-i18n="app_title">RISK//TERMINAL</div>
             <div class="lang-switch">
@@ -329,7 +352,7 @@
             waiting: "ENTER PRICES", canvas_sl: "SL", canvas_mkt: "ENTRY", canvas_lmt: "LIMIT",
             custom_title: "CUSTOM ASSET SETUP", custom_name: "Asset Name (e.g. US30)", custom_contract: "Contract Size",
             custom_tick: "Tick Size (e.g. 0.01)", btn_save: "SAVE & APPLY", card_risk: "Risk:", card_avg: "AVG ENTRY",
-            card_sl: "STOP LOSS", card_lot: "TOTAL LOT"
+            card_sl: "STOP LOSS", card_lot: "TOTAL LOT", tilt_warn: "HIGH RISK WARNING"
         },
         ru: {
             app_title: "RISK//ТЕРМИНАЛ", risk_label: "Риск", balance_label: "Баланс", comm_label: "Комиссия ($)",
@@ -339,7 +362,7 @@
             waiting: "ВВЕДИТЕ ЦЕНЫ", canvas_sl: "СТОП", canvas_mkt: "ВХОД", canvas_lmt: "ЛИМИТ",
             custom_title: "НАСТРОЙКА АКТИВА", custom_name: "Название (напр. US30)", custom_contract: "Размер контракта",
             custom_tick: "Размер тика (напр. 0.01)", btn_save: "СОХРАНИТЬ", card_risk: "Риск:", card_avg: "СРЕДНИЙ ВХОД",
-            card_sl: "СТОП ЛОСС", card_lot: "ОБЩИЙ ЛОТ"
+            card_sl: "СТОП ЛОСС", card_lot: "ОБЩИЙ ЛОТ", tilt_warn: "КРИТИЧЕСКИЙ РИСК"
         }
     };
 
@@ -374,26 +397,14 @@
 
     // --- TRADINGVIEW INTEGRATION ---
     function initTradingView(symbol) {
-        if (window.innerWidth < 1024) return; // Ignore on mobile
-        
+        if (window.innerWidth < 1024) return; 
         document.getElementById('tv_chart_container').innerHTML = '';
-        
         new TradingView.widget({
-            "autosize": true,
-            "symbol": symbol,
-            "interval": "15",
-            "timezone": "Etc/UTC",
-            "theme": "dark",
-            "style": "1",
-            "locale": state.lang === 'ru' ? "ru" : "en",
-            "enable_publishing": false,
-            "backgroundColor": "#0d0d0d",
-            "gridColor": "rgba(255, 255, 255, 0.04)",
-            "hide_top_toolbar": false,
-            "hide_legend": false,
-            "save_image": false,
-            "container_id": "tv_chart_container",
-            "toolbar_bg": "#0d0d0d"
+            "autosize": true, "symbol": symbol, "interval": "15", "timezone": "Etc/UTC",
+            "theme": "dark", "style": "1", "locale": state.lang === 'ru' ? "ru" : "en",
+            "enable_publishing": false, "backgroundColor": "#0d0d0d", "gridColor": "rgba(255, 255, 255, 0.04)",
+            "hide_top_toolbar": false, "hide_legend": false, "save_image": false,
+            "container_id": "tv_chart_container", "toolbar_bg": "#0d0d0d"
         });
     }
 
@@ -401,10 +412,7 @@
     function setupAutoScroll() {
         const slider = document.getElementById('assetSlider');
         let isDown = false, isPaused = false;
-        let startX, scrollLeft;
-        let scrollDir = 1;
-        let resumeTimeout = null;
-        let virtualScroll = 0;
+        let startX, scrollLeft, scrollDir = 1, resumeTimeout = null, virtualScroll = 0;
 
         function pauseInteraction() { isPaused = true; clearTimeout(resumeTimeout); }
         function resumeInteraction() {
@@ -451,7 +459,6 @@
             if(dict[lang][key]) el.innerText = dict[lang][key];
         });
         calc(); 
-        // Sync TV widget language
         initTradingView(ASSETS[state.asset].tvSymbol || state.asset);
     }
     const t = (key) => dict[state.lang][key] || key;
@@ -499,8 +506,63 @@
         return val;
     }
 
+    // --- TILT GUARD & CALCULATION ---
     function calc() {
         let riskVal = parseFloat(document.getElementById('riskInput').value) || 0;
+        let bal = parseFloat(document.getElementById('balanceInput').value) || 0;
+        if (bal <= 0) bal = 10000; // Fallback to prevent NaN
+        
+        let riskPct = 0;
+
+        // Hard Cap at 20%
+        if (state.riskMode === 'pct') {
+            if (riskVal > 20) {
+                riskVal = 20;
+                document.getElementById('riskInput').value = 20;
+            }
+            riskPct = riskVal;
+        } else {
+            const maxUsd = bal * 0.20;
+            if (riskVal > maxUsd) {
+                riskVal = maxUsd;
+                document.getElementById('riskInput').value = maxUsd.toFixed(0);
+            }
+            riskPct = (riskVal / bal) * 100;
+        }
+
+        // Tilt Guard Trigger
+        let tiltIntensity = 0;
+        if (riskPct > 3) {
+            tiltIntensity = Math.min((riskPct - 3) / 17, 1); // Scales from 0 to 1 as risk approaches 20%
+        }
+
+        const appBox = document.getElementById('appBox');
+        const warnText = document.getElementById('tiltWarningText');
+
+        if (tiltIntensity > 0) {
+            appBox.style.setProperty('--tilt-glow', tiltIntensity);
+            appBox.style.animation = `heartbeat ${1.5 - (tiltIntensity * 0.8)}s infinite`;
+            appBox.style.background = `rgba(${15 + (tiltIntensity * 60)}, 15, 15, 0.6)`;
+            
+            // Pop Ghost Text
+            warnText.style.transition = 'none';
+            warnText.style.opacity = tiltIntensity * 0.9;
+            warnText.style.transform = `translate(-50%, -50%) scale(${1 + (tiltIntensity * 0.2)})`;
+            
+            // Reflow to trigger transition
+            void warnText.offsetWidth;
+            
+            warnText.style.transition = 'all 1.5s cubic-bezier(0.1, 0.9, 0.2, 1)';
+            warnText.style.opacity = 0;
+            warnText.style.transform = `translate(-50%, -50%) scale(1)`;
+        } else {
+            appBox.style.setProperty('--tilt-glow', 0);
+            appBox.style.animation = 'none';
+            appBox.style.background = 'rgba(15, 15, 15, 0.6)';
+            warnText.style.opacity = 0;
+        }
+
+        // Normal Calculations
         const comm = parseFloat(document.getElementById('commInput').value) || 0;
         const entry = parseFloat(document.getElementById('entryPrice').value) || 0;
         const stop = parseFloat(document.getElementById('stopPrice').value) || 0;
@@ -515,7 +577,6 @@
         const data = ASSETS[state.asset];
         let finalRisk = riskVal;
         if(state.riskMode === 'pct') {
-            const bal = parseFloat(document.getElementById('balanceInput').value) || 0;
             finalRisk = bal * (riskVal / 100);
         }
 
