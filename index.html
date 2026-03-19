@@ -26,7 +26,7 @@
             --danger: #ff5c5c;
             --success: #3be37f;
             --gold: #ffda3b;
-            --btc: #ffa333;
+            --silver: #cbd5e1;
 
             --glass-border: 1px solid rgba(255, 255, 255, 0.08);
             --glow: 0 0 25px rgba(28, 212, 203, 0.08);
@@ -127,7 +127,7 @@
             border-color: rgba(28, 212, 203, 0.5); box-shadow: 0 0 15px rgba(28, 212, 203, 0.15); 
         }
         .chip[data-type="gold"].active { background: rgba(255, 218, 59, 0.15); color: var(--gold); border-color: rgba(255, 218, 59, 0.5); }
-        .chip[data-type="crypto"].active { background: rgba(255, 163, 51, 0.15); color: var(--btc); border-color: rgba(255, 163, 51, 0.5); }
+        .chip[data-type="silver"].active { background: rgba(203, 213, 225, 0.15); color: var(--silver); border-color: rgba(203, 213, 225, 0.5); }
         .chip[data-type="custom"] { border: 1px dashed rgba(255,255,255,0.25); }
 
         /* --- Inputs --- */
@@ -235,8 +235,8 @@
             <div class="chip active" onclick="setAsset(this, 'EURUSD')">EURUSD</div>
             <div class="chip" onclick="setAsset(this, 'GBPUSD')">GBPUSD</div>
             <div class="chip" onclick="setAsset(this, 'USDJPY')">USDJPY</div>
-            <div class="chip" data-type="gold" onclick="setAsset(this, 'XAUUSD')">GOLD</div>
-            <div class="chip" data-type="crypto" onclick="setAsset(this, 'BTCUSD')">BTC</div>
+            <div class="chip" data-type="gold" onclick="setAsset(this, 'XAUUSD')">XAUUSD</div>
+            <div class="chip" data-type="silver" onclick="setAsset(this, 'XAGUSD')">XAGUSD</div>
             <div class="chip" data-type="custom" id="customChipBtn" onclick="openCustomModal()">⚙️ CUSTOM</div>
         </div>
 
@@ -371,7 +371,7 @@
         'GBPUSD': { type: 'direct', contract: 100000, tick: 0.00001, digits: 5, tvSymbol: "FX:GBPUSD" },
         'USDJPY': { type: 'inverted', contract: 100000, tick: 0.001, digits: 3, tvSymbol: "FX:USDJPY" },
         'XAUUSD': { type: 'gold', contract: 100, tick: 0.01, digits: 2, tvSymbol: "OANDA:XAUUSD" },
-        'BTCUSD': { type: 'crypto', contract: 1, tick: 0.01, digits: 2, tvSymbol: "BINANCE:BTCUSD" },
+        'XAGUSD': { type: 'direct', contract: 5000, tick: 0.001, digits: 3, tvSymbol: "OANDA:XAGUSD" },
         'CUSTOM': { type: 'direct', contract: 10, tick: 0.01, digits: 2, name: 'CUSTOM', tvSymbol: "US30" }
     };
     let state = { asset: 'EURUSD', riskMode: 'usd', lang: 'en' };
@@ -510,11 +510,10 @@
     function calc() {
         let riskVal = parseFloat(document.getElementById('riskInput').value) || 0;
         let bal = parseFloat(document.getElementById('balanceInput').value) || 0;
-        if (bal <= 0) bal = 10000; // Fallback to prevent NaN
+        if (bal <= 0) bal = 10000; 
         
         let riskPct = 0;
 
-        // Hard Cap at 20%
         if (state.riskMode === 'pct') {
             if (riskVal > 20) {
                 riskVal = 20;
@@ -530,10 +529,9 @@
             riskPct = (riskVal / bal) * 100;
         }
 
-        // Tilt Guard Trigger
         let tiltIntensity = 0;
         if (riskPct > 3) {
-            tiltIntensity = Math.min((riskPct - 3) / 17, 1); // Scales from 0 to 1 as risk approaches 20%
+            tiltIntensity = Math.min((riskPct - 3) / 17, 1); 
         }
 
         const appBox = document.getElementById('appBox');
@@ -544,13 +542,11 @@
             appBox.style.animation = `heartbeat ${1.5 - (tiltIntensity * 0.8)}s infinite`;
             appBox.style.background = `rgba(${15 + (tiltIntensity * 60)}, 15, 15, 0.6)`;
             
-            // Pop Ghost Text
             warnText.style.transition = 'none';
             warnText.style.opacity = tiltIntensity * 0.9;
             warnText.style.transform = `translate(-50%, -50%) scale(${1 + (tiltIntensity * 0.2)})`;
             
-            // Reflow to trigger transition
-            void warnText.offsetWidth;
+            void warnText.offsetWidth; 
             
             warnText.style.transition = 'all 1.5s cubic-bezier(0.1, 0.9, 0.2, 1)';
             warnText.style.opacity = 0;
@@ -562,7 +558,6 @@
             warnText.style.opacity = 0;
         }
 
-        // Normal Calculations
         const comm = parseFloat(document.getElementById('commInput').value) || 0;
         const entry = parseFloat(document.getElementById('entryPrice').value) || 0;
         const stop = parseFloat(document.getElementById('stopPrice').value) || 0;
